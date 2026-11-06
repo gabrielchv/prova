@@ -1,0 +1,11 @@
+# Keep the build context small and, more importantly, keep generated output and
+# local state out of the image. The image rebuilds the site from cases/ + evidence/.
+build/
+.git/
+.github/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+tests/
+.DS_Store

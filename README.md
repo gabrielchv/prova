@@ -5,6 +5,8 @@
 **A portfolio where every claim cites a file that exists in the repository — and
 the build fails if it doesn't.**
 
+**Live: https://prova-662877194200.us-central1.run.app**
+
 `prova` (Portuguese for *proof*) is a claim-verification layer for a developer
 portfolio. Each project is a YAML case study whose statements carry repository
 paths. A collector records each repository's file tree from GitHub at a fixed
@@ -93,6 +95,21 @@ make refresh               # collect -> verify -> build
 
 `make build` refuses to run if verification fails. Rendering is downstream of
 proof, not parallel to it.
+
+## Deployment
+
+The site is served by nginx on Cloud Run, built from `deploy/Dockerfile`:
+
+```bash
+make deploy
+```
+
+The image rebuilds the site inside the container from `cases/` and `evidence/`,
+which means `tool/render.py` runs the validator during `docker build`. A citation
+that no longer resolves fails the build, so a deployed page cannot contain a
+claim that is not checkable. The service scales to zero.
+
+Set `PROJECT`, `REGION` or `SERVICE` to deploy elsewhere.
 
 ## Adding a case
 
