@@ -50,6 +50,7 @@ drift from the code, because drift is a build failure.
 | Case id matches its filename | error |
 | Claim ids are unique within a case | error |
 | No overclaiming vocabulary ("world-class", "10x", …) | warning |
+| A Portuguese tagline is present | warning |
 | At least one claim or verification cites a test | warning |
 
 `limits` is the one section that needs no citation. An admission does not
@@ -57,7 +58,7 @@ require proof, and a project with no stated limits has not been examined.
 
 ## The cases
 
-Eight repositories, 61 claims, 185 file citations.
+Twelve repositories, 92 claims, 289 file citations.
 
 - **hookrelay** — reliable webhook delivery, Kafka/SQS behind one port, retries, dead-lettering, signed payloads
 - **status-page** — uptime monitoring with an incident state machine and an SSE status page
@@ -67,6 +68,10 @@ Eight repositories, 61 claims, 185 file citations.
 - **spring-rabbit-saga** — choreographed saga across three services with explicit compensation and dead-lettering
 - **InquilinoIA** — RAG over Brazilian tenancy law where citations are verified in code, not trusted
 - **AutoApply** — browser extension that fills job forms through a schema-validated plan the model cannot fabricate
+- **Task Helper AI** — task assistant whose only write path is a pure reducer with one invariant
+- **Obsidian Chatter** — chat over a knowledge vault where writes come back as reversible git commits
+- **RAG-IC** — local-first retrieval over safety documentation that refuses instead of improvising
+- **VIRT-IC** — correlating one packet across five vantage points to explain container networking
 
 ## Quickstart
 
@@ -121,7 +126,9 @@ weekly and fails if a claim no longer resolves.
 
 ## Feeding the portfolio site
 
-`build/projects.json` is shaped for direct import by the existing portfolio
+`catalog/projects.json` is the committed, deterministic copy of that catalogue;
+`build/projects.json` is the same bytes in the ignored build directory. The
+catalog is shaped for direct import by the existing portfolio
 (`gabrielchv/portfolio`, `src/data/profile.ts`). Project entries there were
 seeded by hand from a knowledge base once, which is how a site ends up claiming
 things the resumes have stopped claiming. Consuming this file removes that

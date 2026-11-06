@@ -1,0 +1,40 @@
+{
+  "repo": "gabrielchv/virt-ic",
+  "collected_at": "2026-11-06T17:03:41Z",
+  "default_branch": "master",
+  "head_sha": "90c8dc23c98d4b1878db57da158f61b7af70b603",
+  "head_date": "2026-08-26T16:50:58Z",
+  "pushed_at": "2026-08-26T16:51:06Z",
+  "homepage": null,
+  "primary_language": "Python",
+  "languages": {
+    "Python": 22601,
+    "Shell": 399,
+    "Dockerfile": 150
+  },
+  "file_count": 11,
+  "tree_truncated": false,
+  "paths": [
+    ".gitignore",
+    "CONTEXT.md",
+    "PLAN.md",
+    "README.md",
+    "compose.yml",
+    "db/init.sql",
+    "poc/analyze.py",
+    "poc/capture.py",
+    "run.sh",
+    "web/Dockerfile",
+    "web/app.py"
+  ],
+  "shape": {
+    "ci_workflows": [],
+    "tests": [],
+    "terraform": [],
+    "containers": [
+      "compose.yml",
+      "web/Dockerfile"
+    ],
+    "docs": []
+  }
+}

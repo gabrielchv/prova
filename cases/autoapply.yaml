@@ -4,6 +4,10 @@ repo: gabrielchv/AutoApply
 tagline: >-
   A browser extension that fills job applications with a language model, designed
   so the model is structurally unable to invent a fact about the applicant.
+tagline_pt: >-
+  Extensão de navegador que preenche candidaturas com um modelo de linguagem,
+  projetada para o modelo ser estruturalmente incapaz de inventar um fato
+  sobre o candidato.
 role: >-
   Independent build: extension architecture, the fill-plan schema and validator,
   the prompt layer, the local LLM client, the ATS test environment and CI.

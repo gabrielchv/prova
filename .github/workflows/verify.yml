@@ -36,6 +36,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make refresh
 
+      # The committed catalogue is what downstream consumers read. If a repository
+      # moved, this fails instead of letting the portfolio show a stale claim.
+      - name: Fail if catalog/projects.json is stale
+        run: |
+          if ! git diff --quiet -- catalog/; then
+            echo "::error::catalog/projects.json is stale. Run 'make build' and commit it."
+            git diff --stat -- catalog/
+            exit 1
+          fi
+
       - name: Upload rendered site
         uses: actions/upload-artifact@v4
         with:

@@ -1,0 +1,159 @@
+id: rag-ic
+name: RAG-IC
+repo: gabrielchv/RAG-IC
+tagline: >-
+  A retrieval system for internal safety documentation where indexing and search
+  run entirely on the machine, and the assistant refuses rather than improvise.
+tagline_pt: >-
+  Sistema de recuperação para documentação interna de segurança em que
+  indexação e busca rodam inteiramente na máquina, e o assistente recusa em
+  vez de improvisar.
+role: >-
+  Undergraduate research project (Iniciação Científica): corpus design, ingestion
+  and chunking, hybrid retrieval, the refusal policy, the evaluation harness and
+  the report.
+period: "2026-08"
+pillars:
+  - ai
+  - data
+stack:
+  - Python
+  - multilingual-e5
+  - BM25
+  - NumPy
+  - Gemini
+  - Ollama
+  - FastAPI
+problem: >-
+  A company that wants an assistant over its own occupational-safety procedures
+  does not want to ship the whole corpus to a model provider. The interesting
+  constraint is therefore architectural: how much of the pipeline can stay local,
+  and what exactly is allowed to leave the machine. In this domain a plausible
+  wrong answer about respirator class is a safety hazard, not a bad user
+  experience.
+approach:
+  - title: Indexing and retrieval never leave the machine
+    body: >-
+      Documents are loaded, chunked, embedded and searched locally. Embeddings are
+      computed with a local multilingual model and stored as NumPy arrays, so the
+      vector index is a file on disk rather than a hosted service.
+  - title: Two retrievers, fused by rank
+    body: >-
+      Dense cosine search over local embeddings runs alongside BM25 over the same
+      chunks, and the two rankings are combined with Reciprocal Rank Fusion. Each
+      covers the other's weakness: exact terminology versus paraphrase.
+  - title: Refusal is a feature
+    body: >-
+      When retrieval does not surface support for an answer, the system says so
+      instead of answering anyway. The corpus is safety documentation, where
+      confident invention is the dangerous failure.
+claims:
+  - id: local-embeddings
+    text: >-
+      Embeddings are computed by a local multilingual model with no network call,
+      stored as NumPy vectors alongside the chunk metadata.
+    cite:
+      - src/rag_ic/embeddings/local_e5.py
+      - src/rag_ic/embeddings/base.py
+      - src/rag_ic/retrieval/store.py
+  - id: hybrid-fusion
+    text: >-
+      Dense cosine retrieval and BM25 lexical retrieval are combined with
+      Reciprocal Rank Fusion over the same chunk set.
+    cite:
+      - src/rag_ic/retrieval/dense.py
+      - src/rag_ic/retrieval/lexical.py
+      - src/rag_ic/retrieval/fusion.py
+      - tests/test_fusion.py
+  - id: structural-chunking
+    text: >-
+      Chunking is structural rather than fixed-size: it follows headings, pages and
+      rows, so a chunk corresponds to a document section.
+    cite:
+      - src/rag_ic/ingest/chunking.py
+      - tests/test_chunking.py
+      - src/rag_ic/ingest/loaders.py
+  - id: query-prefix
+    text: >-
+      The asymmetric query and passage prefixes required by the embedding model are
+      applied and covered by tests, which is a silent failure mode when omitted.
+    cite:
+      - src/rag_ic/embeddings/local_e5.py
+      - tests/test_embeddings_prefix.py
+  - id: pluggable-llm
+    text: >-
+      The language model sits behind an interface with both a hosted Gemini
+      implementation and a local Ollama implementation, so the whole pipeline can
+      run without a cloud provider.
+    cite:
+      - src/rag_ic/llm/base.py
+      - src/rag_ic/llm/gemini.py
+      - src/rag_ic/llm/ollama.py
+  - id: evaluation
+    text: >-
+      Retrieval and answer quality are measured by an evaluation harness with
+      metrics and a curated gold question set, rather than judged by inspection.
+    cite:
+      - src/rag_ic/evaluation/metrics.py
+      - src/rag_ic/evaluation/run_eval.py
+      - data/aurora/gold/questions.jsonl
+  - id: corpus
+    text: >-
+      The test corpus is a realistic 32-document safety knowledge base in Brazilian
+      Portuguese, including procedures, meeting minutes, indicators and delivery
+      records.
+    cite:
+      - data/aurora/docs/politica-epi.md
+      - data/aurora/docs/procedimento-entrega-epi.md
+      - data/aurora/docs/registro-entregas-epi.csv
+      - data/aurora/pdf_sources/ata-cipa-2026-06.md
+  - id: api
+    text: >-
+      The pipeline is served through a FastAPI application over the same local
+      index.
+    cite:
+      - src/rag_ic/api/main.py
+      - src/rag_ic/pipeline.py
+decisions:
+  - chose: >-
+      Local embeddings with a file-based vector index.
+    rejected: >-
+      A hosted embedding API and a vector database.
+    why: >-
+      The entire premise is that the corpus does not leave the machine. Sending
+      every chunk to a provider to compute embeddings would defeat the requirement
+      before retrieval even begins.
+  - chose: >-
+      Fusing dense and lexical retrieval by rank.
+    rejected: >-
+      Dense retrieval alone.
+    why: >-
+      Safety documentation is full of exact identifiers — equipment codes, standard
+      numbers, CA registrations — that embeddings blur and BM25 matches exactly.
+      Dropping lexical retrieval would make the most citable questions the hardest.
+  - chose: >-
+      Refusing when retrieval does not support an answer.
+    rejected: >-
+      Always producing the best available answer.
+    why: >-
+      In this domain a wrong answer about protective equipment is a hazard. A
+      refusal is recoverable; a confident fabrication is not.
+verification:
+  - what: >-
+      Tests for chunking, loaders, fusion, lexical retrieval and the embedding
+      query prefix convention.
+    cite:
+      - tests/test_chunking.py
+      - tests/test_loaders.py
+      - tests/test_fusion.py
+      - tests/test_lexical.py
+      - tests/test_embeddings_prefix.py
+  - what: >-
+      An evaluation run scores the pipeline against a curated gold question set.
+    cite:
+      - src/rag_ic/evaluation/run_eval.py
+      - data/aurora/gold/questions.jsonl
+limits:
+  - The corpus is a single fictional company's 32 documents. Results do not establish behaviour on a large or messy real archive.
+  - Only retrieved passages are sent to the language model when a hosted model is configured; "fully local" describes indexing and retrieval, not every possible configuration.
+  - Retrieval quality is measured against a gold set written by the same person who built the pipeline, so it is not an independent benchmark.

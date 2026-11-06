@@ -4,6 +4,9 @@ repo: gabrielchv/spring-rabbit-saga
 tagline: >-
   A choreographed saga over RabbitMQ: three services, one distributed
   transaction, and a compensation path for every way it can fail partway.
+tagline_pt: >-
+  Uma saga coreografada sobre RabbitMQ: três serviços, uma transação
+  distribuída e um caminho de compensação para cada forma de falhar no meio.
 role: >-
   Independent build: three services in Java and Kotlin, the event contracts, the
   RabbitMQ topology with dead-lettering, the compensating flows and the Cloud Run

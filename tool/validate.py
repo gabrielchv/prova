@@ -183,6 +183,15 @@ def check_case(case: dict, report: Report, seen_ids: set[str], seen_stems: set[s
         if not isinstance(value, str) or not value.strip():
             report.error(label, f"{key} must be a non-empty string")
 
+    # Optional, but when present it must be real: a bilingual site that silently
+    # falls back to English on its Portuguese route is a defect, not a default.
+    if "tagline_pt" in case:
+        value = case.get("tagline_pt")
+        if not isinstance(value, str) or len(value.strip()) < 20:
+            report.error(label, "tagline_pt must be at least 20 chars when present")
+    else:
+        report.warn(label, "no tagline_pt; the portfolio's /pt route will show English copy")
+
     pillars = case.get("pillars")
     if not isinstance(pillars, list) or not pillars:
         report.error(label, "pillars must be a non-empty list")

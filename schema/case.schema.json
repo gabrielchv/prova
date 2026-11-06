@@ -23,6 +23,12 @@
       "description": "owner/name on GitHub."
     },
     "tagline": { "type": "string", "minLength": 20, "maxLength": 240 },
+    "tagline_pt": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 240,
+      "description": "Brazilian Portuguese tagline for the portfolio's /pt route. Falls back to the English tagline when absent, which is a defect on a bilingual site."
+    },
     "role": {
       "type": "string",
       "minLength": 10,

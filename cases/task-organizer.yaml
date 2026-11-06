@@ -1,0 +1,163 @@
+id: task-organizer
+name: Task Helper AI
+repo: gabrielchv/task-organizer
+live_url: https://task-organizer.gazerah.com
+tagline: >-
+  A task assistant whose only write path is a pure reducer with one invariant,
+  so no model, client or race can produce a list that violates it.
+tagline_pt: >-
+  Assistente de tarefas cujo único caminho de escrita é um reducer puro com um
+  invariante, então nenhum modelo, cliente ou corrida pode produzir uma lista
+  que o viole.
+role: >-
+  Independent build: conversation protocol, agent loop and tool surface, the
+  reducer and storage layer, Firebase auth and rules, the Vosk audio worklet and
+  the CI suite.
+period: "2025-08"
+pillars:
+  - ai
+  - fullstack
+  - security
+stack:
+  - TypeScript
+  - Next.js 16
+  - React 19
+  - Firebase Auth
+  - Firestore
+  - Gemini
+  - Vosk
+  - Playwright
+problem: >-
+  A chat interface that edits a list is a distributed system with a language
+  model in the write path. The model proposes changes, the client may be showing
+  a stale list, and the user watches both. If every caller mutates the data
+  itself, the invariant that makes the list coherent has no single owner and
+  eventually differs between server and browser.
+approach:
+  - title: The model calls tools; it never returns a list
+    body: >-
+      The assistant emits tool calls — add, update, set status, delete, list —
+      and the server applies them. Returning a whole rewritten list would make
+      every turn a destructive overwrite of state the model only partly saw.
+  - title: One reducer, one invariant
+    body: >-
+      A single pure function is the only code that changes a list, governed by
+      one rule: a task disappears if and only if a delete named its id. The same
+      reducer runs on the server against Firestore and in the browser against
+      localStorage, so guest and signed-in behaviour cannot diverge.
+  - title: Decision records instead of folklore
+    body: >-
+      Five architecture decisions are written down as ADRs, including why due
+      dates use wall-clock time and why no action is ever simulated.
+claims:
+  - id: tool-calling
+    text: >-
+      The assistant mutates state by emitting tool calls that the server applies,
+      rather than returning a rewritten task list.
+    cite:
+      - src/lib/ai/tools/tasks.ts
+      - src/lib/ai/tools/index.ts
+      - src/app/api/chat/route.ts
+  - id: single-reducer
+    text: >-
+      A pure reducer is the only code that changes a task list, enforcing that a
+      task is removed if and only if a delete operation named its id.
+    cite:
+      - src/features/tasks/reducer.ts
+      - src/features/tasks/reducer.test.ts
+  - id: shared-reducer
+    text: >-
+      The same reducer runs server-side against Firestore for signed-in users and
+      client-side against localStorage for guests.
+    cite:
+      - src/features/tasks/session.ts
+      - src/features/tasks/storage.ts
+      - src/features/tasks/storage.test.ts
+  - id: auth
+    text: >-
+      Chat requests verify a Firebase ID token before the agent loop runs, and
+      rate limiting is applied before any model call.
+    cite:
+      - src/app/api/chat/route.ts
+      - src/features/auth/google-token.ts
+      - src/lib/rate-limit.ts
+      - src/lib/rate-limit.test.ts
+  - id: rules
+    text: >-
+      Firestore access rules are covered by their own test suite rather than being
+      written and hoped for.
+    cite:
+      - firestore.rules
+      - tests/rules/tasks.test.ts
+  - id: vosk-worklet
+    text: >-
+      Offline wake-word detection runs Vosk on demand through an AudioWorklet
+      forwarding raw PCM, so the model is not loaded on machines that never use
+      voice.
+    cite:
+      - public/worklets/pcm-forwarder.js
+      - src/lib/vosk/models.test.ts
+      - docs/adr/0004-vosk-loaded-on-demand-via-audioworklet.md
+  - id: no-simulation
+    text: >-
+      No action is ever simulated or optimistically faked: a recorded decision
+      states that the interface only shows what actually happened.
+    cite:
+      - docs/adr/0005-no-simulated-actions.md
+  - id: protocol-tested
+    text: >-
+      The streaming conversation protocol has its own tests, separate from the
+      agent loop that drives it.
+    cite:
+      - src/app/api/chat/protocol.ts
+      - src/app/api/chat/protocol.test.ts
+decisions:
+  - chose: >-
+      Tool calls applied by a single pure reducer on the server.
+    rejected: >-
+      Letting the model return a complete rewritten list each turn.
+    why: >-
+      A full-list rewrite re-sends state the model only partially saw, so any
+      concurrent edit is silently reverted. Tool calls name one intention each,
+      which a reducer can apply or refuse deterministically.
+  - chose: >-
+      Wall-clock semantics for due dates.
+    rejected: >-
+      Storing pure local times with no zone context.
+    why: >-
+      A task due at 09:00 that means a different instant after travel is a bug the
+      user experiences as the app forgetting their day. The trade-off is recorded
+      in an ADR rather than rediscovered later.
+  - chose: >-
+      Loading Vosk only when the voice feature is used.
+    rejected: >-
+      Initialising the speech model on page load.
+    why: >-
+      The model is tens of megabytes. Most sessions never speak, and paying that
+      cost on every load is a bad trade for a feature that is optional.
+verification:
+  - what: >-
+      Unit coverage of the reducer invariant, the tool surface, the agent loop,
+      storage, date handling and the chat API.
+    cite:
+      - src/features/tasks/reducer.test.ts
+      - src/lib/ai/tools/tasks.test.ts
+      - src/lib/ai/agent.test.ts
+      - src/features/tasks/storage.test.ts
+      - src/features/tasks/dates.test.ts
+      - src/features/chat/api.test.ts
+  - what: >-
+      Browser end-to-end tests for the guest chat flow and localisation, plus
+      Firestore rules tests.
+    cite:
+      - tests/e2e/guest-chat.spec.ts
+      - tests/e2e/localization.spec.ts
+      - tests/rules/tasks.test.ts
+  - what: >-
+      CI runs lint, types and the test suite on every change.
+    cite:
+      - .github/workflows/ci.yml
+limits:
+  - The voice path depends on a browser AudioWorklet and is verified by unit tests around the Vosk model loader, not by an automated audio capture test.
+  - Guest mode persists to localStorage, so a guest list is bound to one browser profile and does not merge across devices.
+  - Rate limiting is per-process; it is not a distributed limiter and would not hold across multiple instances without shared state.

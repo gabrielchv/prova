@@ -37,6 +37,7 @@ def base_case(**overrides):
         "name": "demo",
         "repo": "example/demo",
         "tagline": "A tagline long enough to clear the minimum length rule.",
+        "tagline_pt": "Uma chamada em português com tamanho suficiente para passar.",
         "role": "Independent build of the whole thing.",
         "period": "2026-11",
         "pillars": ["messaging"],
@@ -170,6 +171,17 @@ class RuleTests(unittest.TestCase):
         self.assert_error(self.run_case(case), "missing required field")
 
     # -------------------------------------------------------------------- warnings
+    def test_missing_priorities_are_only_a_warning(self):
+        case = base_case()
+        del case["tagline_pt"]
+        report = self.run_case(case)
+        self.assertEqual(report.errors, [])
+        self.assertTrue(any("tagline_pt" in warning for warning in report.warnings))
+
+    def test_short_tagline_pt_is_an_error(self):
+        report = self.run_case(base_case(tagline_pt="curta demais"))
+        self.assert_error(report, "tagline_pt")
+
     def test_overclaiming_word_produces_a_warning_not_a_failure(self):
         case = base_case(tagline="A world-class tool that clears the length rule easily.")
         report = self.run_case(case)

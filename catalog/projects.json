@@ -1,0 +1,339 @@
+{
+  "generated_by": "prova",
+  "note": "Deterministic output: regenerate with `make build`. Consume this instead of hand-maintaining project entries. Every claim here has already been verified against the repository.",
+  "projects": [
+    {
+      "id": "autoapply",
+      "name": "AutoApply",
+      "repo": "gabrielchv/AutoApply",
+      "tagline": "A browser extension that fills job applications with a language model, designed so the model is structurally unable to invent a fact about the applicant.",
+      "tagline_pt": "Extensão de navegador que preenche candidaturas com um modelo de linguagem, projetada para o modelo ser estruturalmente incapaz de inventar um fato sobre o candidato.",
+      "role": "Independent build: extension architecture, the fill-plan schema and validator, the prompt layer, the local LLM client, the ATS test environment and CI.",
+      "period": "2026-08",
+      "pillars": [
+        "ai",
+        "tooling",
+        "security"
+      ],
+      "stack": [
+        "TypeScript",
+        "Chrome MV3",
+        "Firefox",
+        "React",
+        "Vitest",
+        "Terraform",
+        "Cloud Run"
+      ],
+      "live_url": null,
+      "claim_count": 8,
+      "verified_commit": "46bb940a478c8a5aaae1a0ae0754ec697025170c",
+      "case_file": "cases/autoapply.yaml"
+    },
+    {
+      "id": "bookcerto",
+      "name": "bookcerto",
+      "repo": "gabrielchv/bookcerto",
+      "tagline": "Multi-tenant clinic and barbershop scheduling where the double-booking guarantee lives in the database, not in a polite application check that two concurrent requests can both pass.",
+      "tagline_pt": "Agendamento multi-tenant para clínicas e barbearias em que a garantia de não-sobreposição vive no banco, não numa checagem aplicacional que duas requisições concorrentes atravessam.",
+      "role": "Independent build: schema and migrations, booking transaction, availability computation, tenant resolution, background reminders, live dashboard and the Cloud Run deployment.",
+      "period": "2026-11",
+      "pillars": [
+        "fullstack",
+        "data",
+        "platform"
+      ],
+      "stack": [
+        "TypeScript",
+        "Next.js 15",
+        "Postgres",
+        "Drizzle",
+        "BullMQ",
+        "Redis",
+        "Server-Sent Events",
+        "Terraform",
+        "Cloud Run"
+      ],
+      "live_url": "https://bookcerto-e77phu6mxq-uc.a.run.app/booking/aurora",
+      "claim_count": 8,
+      "verified_commit": "76ec49216d172660d402ac290458383816a47722",
+      "case_file": "cases/bookcerto.yaml"
+    },
+    {
+      "id": "caderno",
+      "name": "caderno",
+      "repo": "gabrielchv/caderno",
+      "tagline": "Real-time collaborative editing where the hard part is not the typing — it is conflict semantics, observability and the accessibility gate nobody wants to own.",
+      "tagline_pt": "Edição colaborativa em tempo real em que o difícil não é digitar — é a semântica de conflito, a observabilidade e o portão de acessibilidade que ninguém quer assumir.",
+      "role": "Independent build: the shared sync package, the Socket.IO realtime service, the Next.js client, the test pyramid and the Cloud Run deployment.",
+      "period": "2026-09",
+      "pillars": [
+        "realtime",
+        "fullstack",
+        "platform"
+      ],
+      "stack": [
+        "TypeScript",
+        "Next.js 15",
+        "React 19",
+        "Socket.IO",
+        "pnpm monorepo",
+        "OpenTelemetry",
+        "Prometheus",
+        "Playwright",
+        "Terraform"
+      ],
+      "live_url": null,
+      "claim_count": 7,
+      "verified_commit": "106216be32661e718bf5c10b9e4d2405a5a2c6f3",
+      "case_file": "cases/caderno.yaml"
+    },
+    {
+      "id": "hookrelay",
+      "name": "hookrelay",
+      "repo": "gabrielchv/hookrelay",
+      "tagline": "Reliable webhook delivery as infrastructure. The retry decision belongs to the sender, not to whoever happens to be calling the customer's flaky endpoint.",
+      "tagline_pt": "Entrega confiável de webhooks como infraestrutura. A decisão de retry pertence ao remetente, não a quem estiver chamando o endpoint instável do cliente.",
+      "role": "Independent build: architecture, implementation, tests, Kubernetes manifests, Terraform and the local demo harness.",
+      "period": "2026-11",
+      "pillars": [
+        "messaging",
+        "distributed-systems",
+        "platform"
+      ],
+      "stack": [
+        "TypeScript",
+        "Kafka",
+        "AWS SQS",
+        "DynamoDB",
+        "Redis",
+        "Docker",
+        "Kubernetes",
+        "Terraform"
+      ],
+      "live_url": null,
+      "claim_count": 7,
+      "verified_commit": "030d15826dc4407576d0ef22578d4d91f473c3fb",
+      "case_file": "cases/hookrelay.yaml"
+    },
+    {
+      "id": "inquilino-ia",
+      "name": "InquilinoIA",
+      "repo": "gabrielchv/inquilino-ia",
+      "tagline": "RAG over Brazilian tenancy law where the citation is verified in code against the statute, because asking a model to be careful is not a verification step.",
+      "tagline_pt": "RAG sobre a Lei do Inquilinato em que a citação é verificada em código contra o texto da lei, porque pedir ao modelo que seja cuidadoso não é uma etapa de verificação.",
+      "role": "Independent build: ingestion, retrieval, the verification layer, the evaluation set, the FastAPI backend, the Vue client and the GCP deployment.",
+      "period": "2026-08",
+      "pillars": [
+        "ai",
+        "data",
+        "platform"
+      ],
+      "stack": [
+        "Python",
+        "FastAPI",
+        "Vue 3",
+        "Gemini",
+        "pgvector",
+        "Supabase",
+        "Terraform",
+        "Cloud Run"
+      ],
+      "live_url": null,
+      "claim_count": 8,
+      "verified_commit": "483e9ca5a548c3a7637e627b760a3d53607ab561",
+      "case_file": "cases/inquilino-ia.yaml"
+    },
+    {
+      "id": "jobpipe",
+      "name": "jobpipe",
+      "repo": "gabrielchv/jobpipe",
+      "tagline": "An application pipeline tracker built on the JVM, where the status state machine is enforced on the server because a client-side rule is a suggestion.",
+      "tagline_pt": "Rastreador de candidaturas sobre a JVM, em que a máquina de estados é imposta no servidor porque regra no cliente é sugestão.",
+      "role": "Independent build: Spring Boot service, JWT security, Flyway migrations, the scheduled reminder job, STOMP notifications and the Vue client it serves.",
+      "period": "2026-10",
+      "pillars": [
+        "fullstack",
+        "security",
+        "realtime"
+      ],
+      "stack": [
+        "Java 21",
+        "Spring Boot 3",
+        "Spring Security",
+        "Spring Data JPA",
+        "Flyway",
+        "PostgreSQL",
+        "STOMP WebSocket",
+        "Vue 3",
+        "Cloud Run"
+      ],
+      "live_url": null,
+      "claim_count": 8,
+      "verified_commit": "4330e9e1f026e624980aaf0d9ffe2f098c1f3b74",
+      "case_file": "cases/jobpipe.yaml"
+    },
+    {
+      "id": "obsidian-chatter",
+      "name": "Obsidian Chatter",
+      "repo": "gabrielchv/Obsidian-Chatter",
+      "tagline": "Chat over a personal knowledge vault where writes go back as proper notes, each one a git commit you can undo — the vault stays the source of truth.",
+      "tagline_pt": "Chat sobre um vault de conhecimento pessoal em que as escritas voltam como notas de verdade, cada uma um commit git que você pode desfazer — o vault continua sendo a fonte da verdade.",
+      "role": "Independent build: hybrid retrieval index, git bridge, read and write tools, skills registry, agent loop, SSE API and the React client.",
+      "period": "2026-08",
+      "pillars": [
+        "ai",
+        "data",
+        "tooling"
+      ],
+      "stack": [
+        "Python",
+        "FastAPI",
+        "React",
+        "e5 embeddings",
+        "BM25",
+        "DeepSeek",
+        "Server-Sent Events"
+      ],
+      "live_url": null,
+      "claim_count": 8,
+      "verified_commit": "b20828399ea4b46d8aec5acc7d3069ba74f93545",
+      "case_file": "cases/obsidian-chatter.yaml"
+    },
+    {
+      "id": "rag-ic",
+      "name": "RAG-IC",
+      "repo": "gabrielchv/RAG-IC",
+      "tagline": "A retrieval system for internal safety documentation where indexing and search run entirely on the machine, and the assistant refuses rather than improvise.",
+      "tagline_pt": "Sistema de recuperação para documentação interna de segurança em que indexação e busca rodam inteiramente na máquina, e o assistente recusa em vez de improvisar.",
+      "role": "Undergraduate research project (Iniciação Científica): corpus design, ingestion and chunking, hybrid retrieval, the refusal policy, the evaluation harness and the report.",
+      "period": "2026-08",
+      "pillars": [
+        "ai",
+        "data"
+      ],
+      "stack": [
+        "Python",
+        "multilingual-e5",
+        "BM25",
+        "NumPy",
+        "Gemini",
+        "Ollama",
+        "FastAPI"
+      ],
+      "live_url": null,
+      "claim_count": 8,
+      "verified_commit": "5a813ffc33e147fac4ba76b50e917d65563bab09",
+      "case_file": "cases/rag-ic.yaml"
+    },
+    {
+      "id": "spring-rabbit-saga",
+      "name": "spring-rabbit-saga",
+      "repo": "gabrielchv/spring-rabbit-saga",
+      "tagline": "A choreographed saga over RabbitMQ: three services, one distributed transaction, and a compensation path for every way it can fail partway.",
+      "tagline_pt": "Uma saga coreografada sobre RabbitMQ: três serviços, uma transação distribuída e um caminho de compensação para cada forma de falhar no meio.",
+      "role": "Independent build: three services in Java and Kotlin, the event contracts, the RabbitMQ topology with dead-lettering, the compensating flows and the Cloud Run deployment.",
+      "period": "2026-10",
+      "pillars": [
+        "messaging",
+        "distributed-systems",
+        "platform"
+      ],
+      "stack": [
+        "Java 21",
+        "Kotlin",
+        "Spring Boot 3",
+        "RabbitMQ",
+        "PostgreSQL",
+        "Micrometer",
+        "Docker",
+        "Cloud Run"
+      ],
+      "live_url": null,
+      "claim_count": 8,
+      "verified_commit": "76b92f9b3eecd9b75fad8199d9ecfa18c9fd1cfe",
+      "case_file": "cases/spring-rabbit-saga.yaml"
+    },
+    {
+      "id": "status-page",
+      "name": "status-page",
+      "repo": "gabrielchv/status-page",
+      "tagline": "Uptime monitoring with a real incident lifecycle: the machine decides when an incident opens and closes, and nobody edits a status by hand.",
+      "tagline_pt": "Monitoramento de uptime com ciclo de vida real de incidente: a máquina decide quando um incidente abre e fecha, e ninguém edita um status à mão.",
+      "role": "Independent build: schema, check runner, incident state machine, SSE status page, metrics and the Terraform-deployed Cloud Run service.",
+      "period": "2026-11",
+      "pillars": [
+        "platform",
+        "realtime",
+        "fullstack"
+      ],
+      "stack": [
+        "TypeScript",
+        "Next.js 16",
+        "Postgres",
+        "Drizzle",
+        "Server-Sent Events",
+        "Prometheus",
+        "Terraform",
+        "Cloud Run"
+      ],
+      "live_url": null,
+      "claim_count": 7,
+      "verified_commit": "4f85d2403f60fd1a44d190fd9a166c4668100fed",
+      "case_file": "cases/status-page.yaml"
+    },
+    {
+      "id": "task-organizer",
+      "name": "Task Helper AI",
+      "repo": "gabrielchv/task-organizer",
+      "tagline": "A task assistant whose only write path is a pure reducer with one invariant, so no model, client or race can produce a list that violates it.",
+      "tagline_pt": "Assistente de tarefas cujo único caminho de escrita é um reducer puro com um invariante, então nenhum modelo, cliente ou corrida pode produzir uma lista que o viole.",
+      "role": "Independent build: conversation protocol, agent loop and tool surface, the reducer and storage layer, Firebase auth and rules, the Vosk audio worklet and the CI suite.",
+      "period": "2025-08",
+      "pillars": [
+        "ai",
+        "fullstack",
+        "security"
+      ],
+      "stack": [
+        "TypeScript",
+        "Next.js 16",
+        "React 19",
+        "Firebase Auth",
+        "Firestore",
+        "Gemini",
+        "Vosk",
+        "Playwright"
+      ],
+      "live_url": "https://task-organizer.gazerah.com",
+      "claim_count": 8,
+      "verified_commit": "22168562cc380558cb92410dbde84202d14550fc",
+      "case_file": "cases/task-organizer.yaml"
+    },
+    {
+      "id": "virt-ic",
+      "name": "VIRT-IC",
+      "repo": "gabrielchv/virt-ic",
+      "tagline": "One packet, five vantage points. Correlating the same datagram across host, bridge and container namespaces to explain how containers actually talk.",
+      "tagline_pt": "Um pacote, cinco pontos de vista. Correlacionando o mesmo datagrama entre host, bridge e namespaces de containers para explicar como containers realmente conversam.",
+      "role": "Undergraduate research project (Iniciação Científica): capture harness, the correlation key, phase segmentation and the analysis output.",
+      "period": "2026-08",
+      "pillars": [
+        "platform",
+        "data",
+        "tooling"
+      ],
+      "stack": [
+        "Python",
+        "Docker Compose",
+        "tcpdump",
+        "tshark",
+        "nsenter",
+        "Linux network namespaces"
+      ],
+      "live_url": null,
+      "claim_count": 7,
+      "verified_commit": "90c8dc23c98d4b1878db57da158f61b7af70b603",
+      "case_file": "cases/virt-ic.yaml"
+    }
+  ]
+}

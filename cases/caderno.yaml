@@ -5,6 +5,10 @@ tagline: >-
   Real-time collaborative editing where the hard part is not the typing — it is
   conflict semantics, observability and the accessibility gate nobody wants to
   own.
+tagline_pt: >-
+  Edição colaborativa em tempo real em que o difícil não é digitar — é a
+  semântica de conflito, a observabilidade e o portão de acessibilidade que
+  ninguém quer assumir.
 role: >-
   Independent build: the shared sync package, the Socket.IO realtime service, the
   Next.js client, the test pyramid and the Cloud Run deployment.

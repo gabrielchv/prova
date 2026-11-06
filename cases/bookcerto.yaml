@@ -6,6 +6,10 @@ tagline: >-
   Multi-tenant clinic and barbershop scheduling where the double-booking
   guarantee lives in the database, not in a polite application check that two
   concurrent requests can both pass.
+tagline_pt: >-
+  Agendamento multi-tenant para clínicas e barbearias em que a garantia de
+  não-sobreposição vive no banco, não numa checagem aplicacional que duas
+  requisições concorrentes atravessam.
 role: >-
   Independent build: schema and migrations, booking transaction, availability
   computation, tenant resolution, background reminders, live dashboard and the

@@ -4,6 +4,10 @@ repo: gabrielchv/inquilino-ia
 tagline: >-
   RAG over Brazilian tenancy law where the citation is verified in code against
   the statute, because asking a model to be careful is not a verification step.
+tagline_pt: >-
+  RAG sobre a Lei do Inquilinato em que a citação é verificada em código
+  contra o texto da lei, porque pedir ao modelo que seja cuidadoso não é uma
+  etapa de verificação.
 role: >-
   Independent build: ingestion, retrieval, the verification layer, the evaluation
   set, the FastAPI backend, the Vue client and the GCP deployment.

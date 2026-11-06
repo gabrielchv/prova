@@ -4,6 +4,10 @@ repo: gabrielchv/hookrelay
 tagline: >-
   Reliable webhook delivery as infrastructure. The retry decision belongs to the
   sender, not to whoever happens to be calling the customer's flaky endpoint.
+tagline_pt: >-
+  Entrega confiável de webhooks como infraestrutura. A decisão de retry
+  pertence ao remetente, não a quem estiver chamando o endpoint instável do
+  cliente.
 role: >-
   Independent build: architecture, implementation, tests, Kubernetes manifests,
   Terraform and the local demo harness.

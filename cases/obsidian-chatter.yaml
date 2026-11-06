@@ -1,0 +1,154 @@
+id: obsidian-chatter
+name: Obsidian Chatter
+repo: gabrielchv/Obsidian-Chatter
+tagline: >-
+  Chat over a personal knowledge vault where writes go back as proper notes, each
+  one a git commit you can undo — the vault stays the source of truth.
+tagline_pt: >-
+  Chat sobre um vault de conhecimento pessoal em que as escritas voltam como
+  notas de verdade, cada uma um commit git que você pode desfazer — o vault
+  continua sendo a fonte da verdade.
+role: >-
+  Independent build: hybrid retrieval index, git bridge, read and write tools,
+  skills registry, agent loop, SSE API and the React client.
+period: "2026-08"
+pillars:
+  - ai
+  - data
+  - tooling
+stack:
+  - Python
+  - FastAPI
+  - React
+  - e5 embeddings
+  - BM25
+  - DeepSeek
+  - Server-Sent Events
+problem: >-
+  A chat assistant over personal notes fails in two ways that matter more than
+  answer quality. It retrieves badly, because notes are full of wikilinks, tags
+  and headings that a naive chunker destroys. And it writes badly, because an
+  assistant that edits your vault without a reviewable history is one bad turn
+  away from silently corrupting months of thinking.
+approach:
+  - title: Hybrid retrieval that understands vault structure
+    body: >-
+      Dense e5 embeddings and BM25 are fused by Reciprocal Rank Fusion, and the
+      tokenizer keeps wikilink targets and tags atomic, so a note referenced by
+      name is findable by that name.
+  - title: Writes are commits
+    body: >-
+      New knowledge is saved as PARA notes with wikilinks and frontmatter through
+      a git bridge. Every change is a commit, so an unwanted modification is
+      reverted with git rather than repaired by hand.
+  - title: Skills loaded on demand
+    body: >-
+      Instructions live in SKILL.md files that are registered and pulled into the
+      agent loop only when relevant, instead of one enormous fixed system prompt.
+claims:
+  - id: hybrid-rrf
+    text: >-
+      Dense and lexical retrieval are combined with Reciprocal Rank Fusion, with
+      wikilink targets and tags tokenized atomically for BM25.
+    cite:
+      - src/chatter/vault/index.py
+      - src/chatter/vault/embeddings.py
+      - tests/test_index.py
+  - id: git-writes
+    text: >-
+      Vault modifications go through a git bridge, so each write becomes a commit
+      that can be reverted individually.
+    cite:
+      - src/chatter/vault/repo.py
+      - src/chatter/vault/write_tools.py
+      - tests/test_repo.py
+  - id: diffs
+    text: >-
+      Changes are expressed as diffs against the note content rather than by
+      rewriting whole files blindly.
+    cite:
+      - src/chatter/vault/diff.py
+      - tests/test_write_tools.py
+  - id: para-notes
+    text: >-
+      The assistant saves knowledge as PARA notes with wikilinks and frontmatter,
+      matching the vault's own conventions rather than dumping plain text.
+    cite:
+      - src/chatter/vault/write_tools.py
+      - src/chatter/vault/chunking.py
+  - id: skills
+    text: >-
+      Skills are discovered from SKILL.md files and injected into the loop on
+      demand through a registry.
+    cite:
+      - src/chatter/skills/registry.py
+      - src/chatter/agent/loop.py
+      - tests/test_skills.py
+  - id: citations
+    text: >-
+      Web research requires source citations, and retrieved vault context is passed
+      to the model as explicit tools rather than as an opaque prefix.
+    cite:
+      - src/chatter/llm/deepseek.py
+      - src/chatter/vault/read_tools.py
+      - src/chatter/vault/context.py
+  - id: sse
+    text: >-
+      Responses stream to the client over Server-Sent Events behind bearer
+      authentication.
+    cite:
+      - src/chatter/api/sse.py
+      - src/chatter/api/main.py
+      - tests/test_sse.py
+  - id: client-sources
+    text: >-
+      The client surfaces retrieved sources beside the answer, so the evidence for
+      a response is visible rather than implied.
+    cite:
+      - frontend/src/components/SourcesList.tsx
+      - frontend/src/hooks/useChat.ts
+decisions:
+  - chose: >-
+      Writing to the vault as git commits through a bridge.
+    rejected: >-
+      Writing files directly to disk with no revision trail.
+    why: >-
+      An assistant with write access to a person's notes needs an undo that is
+      cheaper than remembering what changed. Git gives that for free, and it also
+      makes the assistant's edits reviewable in the same tool as everything else.
+  - chose: >-
+      Fusing dense retrieval with BM25 over the same chunks.
+    rejected: >-
+      Embeddings alone.
+    why: >-
+      A personal vault is navigated by names: wikilinks, tags, project titles.
+      Embeddings are weak exactly there, and a note you cannot find by its own
+      title reads as a broken search rather than an imperfect one.
+  - chose: >-
+      Loading skills on demand from SKILL.md files.
+    rejected: >-
+      One large system prompt containing every instruction.
+    why: >-
+      Instruction sets grow, and a fixed prompt pays for every skill on every turn.
+      Loading on demand keeps the context relevant and the cost proportional.
+verification:
+  - what: >-
+      Tests for the hybrid index, the git bridge, write tools, skills and the
+      streaming API.
+    cite:
+      - tests/test_index.py
+      - tests/test_repo.py
+      - tests/test_write_tools.py
+      - tests/test_skills.py
+      - tests/test_api.py
+      - tests/test_sse.py
+  - what: >-
+      Chunking behaviour is tested separately from retrieval, since heading and
+      wikilink handling is where vault-aware splitting succeeds or fails.
+    cite:
+      - tests/test_chunking.py
+      - src/chatter/vault/chunking.py
+limits:
+  - Retrieval quality is validated by unit tests on the index rather than measured against a curated gold set the way RAG-IC is.
+  - The git bridge assumes the vault is a git repository; a plain folder has no revision trail, which removes the undo property the design relies on.
+  - DeepSeek is the only model provider implemented, so the "any endpoint" property does not hold here.

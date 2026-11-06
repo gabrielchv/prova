@@ -4,6 +4,9 @@ repo: gabrielchv/jobpipe
 tagline: >-
   An application pipeline tracker built on the JVM, where the status state
   machine is enforced on the server because a client-side rule is a suggestion.
+tagline_pt: >-
+  Rastreador de candidaturas sobre a JVM, em que a máquina de estados é
+  imposta no servidor porque regra no cliente é sugestão.
 role: >-
   Independent build: Spring Boot service, JWT security, Flyway migrations, the
   scheduled reminder job, STOMP notifications and the Vue client it serves.

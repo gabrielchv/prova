@@ -18,7 +18,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from model import BUILD_DIR, PILLARS, load_cases, load_evidence  # noqa: E402
+from model import BUILD_DIR, PILLARS, ROOT, load_cases, load_evidence  # noqa: E402
+
+# A committed copy of the project catalogue, so other repositories (the portfolio)
+# can consume a verified artefact without depending on build/, which is ignored.
+# It is deliberately free of timestamps: CI regenerates it and fails on any diff,
+# which only works if identical inputs produce byte-identical output.
+CATALOG_DIR = ROOT / "catalog"
 
 CSS = """
 :root {
@@ -335,10 +341,10 @@ def render_projects_json(cases: list[dict], evidence_map: dict[str, dict | None]
     repository cannot drift apart the way kb.yaml and profile.ts did."""
     payload = {
         "generated_by": "prova",
-        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "note": (
-            "Consume this instead of hand-maintaining project entries. Every claim "
-            "here has already been verified against the repository."
+            "Deterministic output: regenerate with `make build`. Consume this instead "
+            "of hand-maintaining project entries. Every claim here has already been "
+            "verified against the repository."
         ),
         "projects": [
             {
@@ -346,6 +352,7 @@ def render_projects_json(cases: list[dict], evidence_map: dict[str, dict | None]
                 "name": case["name"],
                 "repo": case["repo"],
                 "tagline": case["tagline"],
+                "tagline_pt": case.get("tagline_pt") or case["tagline"],
                 "role": case["role"],
                 "period": case["period"],
                 "pillars": case["pillars"],
@@ -358,7 +365,7 @@ def render_projects_json(cases: list[dict], evidence_map: dict[str, dict | None]
             for case in cases
         ],
     }
-    return json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    return json.dumps(payload, indent=2, ensure_ascii=False, sort_keys=False) + "\n"
 
 
 def verify_first() -> bool:
@@ -385,6 +392,7 @@ def main() -> int:
     evidence_map = {case["repo"]: load_evidence(case["repo"]) for case in cases}
 
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
+    CATALOG_DIR.mkdir(parents=True, exist_ok=True)
 
     for case in cases:
         markdown = render_markdown(case, evidence_map.get(case["repo"]))
@@ -393,15 +401,16 @@ def main() -> int:
     (BUILD_DIR / "index.html").write_text(
         render_index_html(cases, evidence_map), encoding="utf-8"
     )
-    (BUILD_DIR / "projects.json").write_text(
-        render_projects_json(cases, evidence_map), encoding="utf-8"
-    )
+    catalog = render_projects_json(cases, evidence_map)
+    (BUILD_DIR / "projects.json").write_text(catalog, encoding="utf-8")
+    (CATALOG_DIR / "projects.json").write_text(catalog, encoding="utf-8")
 
     total_claims = sum(len(case["claims"]) for case in cases)
     print(f"rendered {len(cases)} case(s) -> {BUILD_DIR}")
     print(f"  index.html      {len(cases)} articles, {total_claims} cited claims")
     print(f"  projects.json   importable by the portfolio site")
     print(f"  <id>.md         one portable case study per project")
+    print(f"  catalog/projects.json  committed copy for downstream consumers")
     return 0
 
 

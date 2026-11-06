@@ -4,6 +4,9 @@ repo: gabrielchv/status-page
 tagline: >-
   Uptime monitoring with a real incident lifecycle: the machine decides when an
   incident opens and closes, and nobody edits a status by hand.
+tagline_pt: >-
+  Monitoramento de uptime com ciclo de vida real de incidente: a máquina
+  decide quando um incidente abre e fecha, e ninguém edita um status à mão.
 role: >-
   Independent build: schema, check runner, incident state machine, SSE status
   page, metrics and the Terraform-deployed Cloud Run service.
