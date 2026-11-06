@@ -1,0 +1,145 @@
+id: autoapply
+name: AutoApply
+repo: gabrielchv/AutoApply
+tagline: >-
+  A browser extension that fills job applications with a language model, designed
+  so the model is structurally unable to invent a fact about the applicant.
+role: >-
+  Independent build: extension architecture, the fill-plan schema and validator,
+  the prompt layer, the local LLM client, the ATS test environment and CI.
+period: "2026-08"
+pillars:
+  - ai
+  - tooling
+  - security
+stack:
+  - TypeScript
+  - Chrome MV3
+  - Firefox
+  - React
+  - Vitest
+  - Terraform
+  - Cloud Run
+problem: >-
+  Job application forms are hostile and endlessly varied. Asking a model to fill
+  one is easy; the hard part is that a model filling in personal details is one
+  hallucination away from submitting a false claim to an employer on the
+  applicant's behalf. The failure mode is not a bad form, it is a fabricated
+  qualification.
+approach:
+  - title: The model proposes, the schema disposes
+    body: >-
+      The model returns a fill plan rather than writing to the page. That plan is
+      validated against a schema with one corrective retry, and nothing reaches a
+      field until it passes.
+  - title: Facts come from the profile, not the prompt
+    body: >-
+      Candidate facts live in a structured profile in extension storage. The model
+      maps form fields onto that profile; it does not generate the profile.
+  - title: Nothing is submitted, ever
+    body: >-
+      There is no code path that submits a form. Filling text is cheap to review
+      and undo; sending an application is not.
+claims:
+  - id: schema-gated
+    text: >-
+      Model output is a fill plan validated against a schema with one corrective
+      retry before any field is written to the page.
+    cite:
+      - lib/fill/planSchema.ts
+      - lib/fill/planSchema.test.ts
+      - lib/fill/orchestrate.ts
+  - id: profile-sourced
+    text: >-
+      Applicant facts come from a validated profile structure held in extension
+      storage, which the model maps onto form fields rather than inventing.
+    cite:
+      - lib/profile/schema.ts
+      - lib/profile/schema.test.ts
+  - id: no-submit
+    text: >-
+      There is no submit path in the extension; it fills fields and stops, leaving
+      submission to the person.
+    cite:
+      - lib/fill/orchestrate.ts
+      - README.md
+  - id: adapter-free
+    text: >-
+      Form fields are discovered by reading labels, options and required flags from
+      the page instead of relying on per-site adapters.
+    cite:
+      - lib/prompts/mapForm.ts
+      - lib/prompts/mapForm.test.ts
+      - lib/jobContext/extract.ts
+  - id: provider-agnostic
+    text: >-
+      The model client is provider-shaped, with OpenAI-compatible and Anthropic
+      implementations, so a local endpoint works as well as a hosted one.
+    cite:
+      - lib/llm/client.ts
+      - lib/llm/openai.ts
+      - lib/llm/anthropic.ts
+      - lib/llm/presets.ts
+  - id: local-first
+    text: >-
+      There is no backend: the profile, key and résumé stay in extension storage,
+      and the PDF is parsed in the browser.
+    cite:
+      - lib/pdf/extractText.ts
+      - lib/pdf/normalize.ts
+      - lib/fill/attachFile.ts
+  - id: ats-fixtures
+    text: >-
+      A local test environment reproduces seven distinct ATS form shapes,
+      including frame-based and ARIA-widget forms, for development and end-to-end
+      testing.
+    cite:
+      - demo/pages/greenhouse.html
+      - demo/pages/workday.html
+      - demo/pages/aria.html
+      - demo/pages/iframe-form.html
+      - demo/server.js
+  - id: ci
+    text: >-
+      CI runs lint, formatting, type checks, the unit suite and both browser
+      builds on every change.
+    cite:
+      - .github/workflows/ci.yml
+decisions:
+  - chose: >-
+      A schema-validated fill plan produced before anything is written.
+    rejected: >-
+      Letting the model call fill functions directly.
+    why: >-
+      Once a model can write to the page, the only remaining control is whatever
+      discipline the prompt asked for. A plan is inspectable, testable and
+      rejectable before it has any effect.
+  - chose: >-
+      Reading the form generically rather than shipping per-site adapters.
+    rejected: >-
+      A maintained adapter per applicant tracking system.
+    why: >-
+      There are hundreds of them and they change without notice. Adapting to one
+      site each time guarantees the tool is wrong somewhere important on the day
+      it matters most.
+verification:
+  - what: >-
+      Unit coverage of the fill-plan schema, the profile schema, prompt parsing,
+      field filling and file attachment.
+    cite:
+      - lib/fill/planSchema.test.ts
+      - lib/profile/schema.test.ts
+      - lib/prompts/mapForm.test.ts
+      - lib/fill/fillField.test.ts
+      - lib/fill/attachFile.test.ts
+  - what: >-
+      Message-protocol tests for the background and content contexts, which cannot
+      share memory.
+    cite:
+      - lib/messaging/protocol.test.ts
+      - lib/background/handlers.test.ts
+limits:
+  - Field detection is validated against fixtures and unit tests, not against a live application tracking system in a real browser session.
+  - The schema guarantees shape and provenance, not judgement. A correctly sourced fact can still be the wrong answer to a badly worded question, which is why the result is reviewed rather than submitted.
+  - Only OpenAI-compatible and Anthropic endpoints are implemented; other providers require a new client.
+  - The extension is not published to any browser store, so installation is a developer-mode load rather than a one-click install.

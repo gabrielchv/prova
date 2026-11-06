@@ -1,0 +1,128 @@
+id: status-page
+name: status-page
+repo: gabrielchv/status-page
+tagline: >-
+  Uptime monitoring with a real incident lifecycle: the machine decides when an
+  incident opens and closes, and nobody edits a status by hand.
+role: >-
+  Independent build: schema, check runner, incident state machine, SSE status
+  page, metrics and the Terraform-deployed Cloud Run service.
+period: "2026-11"
+pillars:
+  - platform
+  - realtime
+  - fullstack
+stack:
+  - TypeScript
+  - Next.js 16
+  - Postgres
+  - Drizzle
+  - Server-Sent Events
+  - Prometheus
+  - Terraform
+  - Cloud Run
+problem: >-
+  A status page is only worth reading if it is honest. Most are a hand-edited
+  page that somebody remembers to update during an incident, which is precisely
+  the failure mode the page exists to prevent: during an outage, the person who
+  would update it is busy.
+approach:
+  - title: Checks are driven from outside the request path
+    body: >-
+      A scheduler posts to an internal endpoint on a fixed cadence. The web
+      process answers requests; it does not hold a timer that dies with the
+      instance.
+  - title: Incidents are a state machine, not a status column
+    body: >-
+      The rules for opening and resolving an incident are a pure function, tested
+      without a database, so "when does this become an incident" is answerable by
+      reading one file.
+  - title: The public page is an event stream
+    body: >-
+      The status page subscribes to Server-Sent Events instead of polling, so what
+      a visitor sees changes while they are looking at it.
+claims:
+  - id: scheduler
+    text: >-
+      A scheduler triggers checks on a fixed cadence through an internal endpoint
+      that selects the monitors currently due.
+    cite:
+      - src/app/api/internal/run-checks/route.ts
+      - src/lib/check/runner.ts
+      - src/lib/check/record.ts
+  - id: transitions
+    text: >-
+      Incidents open on up-to-down and resolve on down-to-up through a pure
+      transition function with its own unit tests.
+    cite:
+      - src/lib/check/transition.ts
+      - src/lib/check/transition.test.ts
+  - id: sse
+    text: >-
+      The public status page updates live over Server-Sent Events served from a
+      dedicated route.
+    cite:
+      - src/app/api/status/[slug]/events/route.ts
+      - src/lib/sse.ts
+  - id: uptime-windows
+    text: >-
+      Uptime percentages are computed over 7, 30 and 90-day windows by a module
+      that is unit-tested independently of the database.
+    cite:
+      - src/lib/uptime.ts
+      - src/lib/uptime.test.ts
+  - id: sessions
+    text: >-
+      Server-side sessions: hashed tokens stored in Postgres, delivered in an
+      httpOnly SameSite=Lax cookie, with bcrypt password hashing.
+    cite:
+      - src/lib/session.ts
+      - src/lib/password.ts
+  - id: probes-and-metrics
+    text: >-
+      Separate liveness and readiness probes plus a Prometheus endpoint exposing
+      check counters, latency and incident transitions.
+    cite:
+      - src/app/api/healthz/route.ts
+      - src/app/api/readyz/route.ts
+      - src/app/api/metrics/route.ts
+      - src/lib/metrics.ts
+  - id: infrastructure
+    text: >-
+      GCP resources are declared in Terraform and the service deploys from CI
+      without a long-lived service account key.
+    cite:
+      - terraform/main.tf
+      - .github/workflows/deploy.yml
+decisions:
+  - chose: >-
+      Running checks from a scheduler outside the web process.
+    rejected: >-
+      Checking from inside a long-lived process or on request.
+    why: >-
+      A monitor that depends on the server being healthy cannot report that the
+      server is unhealthy. The thing that watches has to be somewhere else.
+  - chose: >-
+      A pure transition function for incident state.
+    rejected: >-
+      Mutating an incident row directly from the check handler.
+    why: >-
+      Deciding when an incident opens and closes is the only genuinely interesting
+      logic in the system, so it belongs somewhere it can be tested without a
+      database and read without tracing a request.
+verification:
+  - what: >-
+      Unit tests for the incident state machine, the uptime window calculation and
+      the check runner.
+    cite:
+      - src/lib/check/transition.test.ts
+      - src/lib/uptime.test.ts
+      - src/lib/check/runner.test.ts
+  - what: >-
+      End-to-end browser coverage of the status page.
+    cite:
+      - e2e/status.spec.ts
+limits:
+  - The monitor and the monitored services share a region, so a regional outage would take out the page that reports it. This is the classic status-page blind spot and is not solved here.
+  - The project reports state; it does not alert anyone. Paging is deliberately out of scope.
+  - Retention and aggregation are per-row over a short window; this is not built for years of history.

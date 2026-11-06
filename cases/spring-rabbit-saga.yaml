@@ -1,0 +1,140 @@
+id: spring-rabbit-saga
+name: spring-rabbit-saga
+repo: gabrielchv/spring-rabbit-saga
+tagline: >-
+  A choreographed saga over RabbitMQ: three services, one distributed
+  transaction, and a compensation path for every way it can fail partway.
+role: >-
+  Independent build: three services in Java and Kotlin, the event contracts, the
+  RabbitMQ topology with dead-lettering, the compensating flows and the Cloud Run
+  deployment.
+period: "2026-10"
+pillars:
+  - messaging
+  - distributed-systems
+  - platform
+stack:
+  - Java 21
+  - Kotlin
+  - Spring Boot 3
+  - RabbitMQ
+  - PostgreSQL
+  - Micrometer
+  - Docker
+  - Cloud Run
+problem: >-
+  An order spans three services, and any one of them can fail after the previous
+  one has already done its work. There is no shared transaction to roll back: the
+  money was taken, or the stock was reserved, and now something downstream has
+  said no. A distributed transaction has to be expressed as a sequence of local
+  transactions plus explicit compensations.
+approach:
+  - title: Choreography, not an orchestrator
+    body: >-
+      Services react to events rather than receiving commands from a central
+      coordinator. Each service publishes what happened; the order service is the
+      only one that knows the saga's final state.
+  - title: Both failure edges are modelled
+    body: >-
+      Payment can decline and inventory can fail to reserve. Each has its own
+      event type, and each drives an explicit terminal state rather than leaving
+      the order in an ambiguous middle.
+  - title: Dead-letter queues on every consumer
+    body: >-
+      Poison messages leave the main queue instead of blocking it, and the retry
+      policy is declared in configuration alongside the exchange topology.
+claims:
+  - id: choreography
+    text: >-
+      The saga is choreographed through a topic exchange: order events are
+      consumed by payment, payment results by inventory and by the order service,
+      with no central coordinator.
+    cite:
+      - order-service/src/main/java/dev/gazerah/saga/order/config/RabbitConfig.java
+      - inventory-service/src/main/java/dev/gazerah/saga/inventory/config/RabbitConfig.java
+      - payment-service/src/main/kotlin/dev/gazerah/saga/payment/config/RabbitConfig.kt
+  - id: compensation
+    text: >-
+      Both failure edges are explicit event types feeding a terminal order state,
+      so a declined payment and a failed reservation each have a defined outcome.
+    cite:
+      - order-service/src/main/java/dev/gazerah/saga/events/PaymentFailedEvent.java
+      - order-service/src/main/java/dev/gazerah/saga/events/InventoryFailedEvent.java
+      - order-service/src/main/java/dev/gazerah/saga/events/OrderFailedEvent.java
+      - order-service/src/main/java/dev/gazerah/saga/order/saga/OrderSagaConsumer.java
+  - id: terminal-states
+    text: >-
+      The order's terminal states are constrained to completed or failed, decided
+      by the saga consumer rather than by the REST controller.
+    cite:
+      - order-service/src/main/java/dev/gazerah/saga/order/order/OrderStatus.java
+      - order-service/src/main/java/dev/gazerah/saga/order/saga/OrderSagaConsumer.java
+  - id: dead-lettering
+    text: >-
+      Each consumer declares a dead-letter exchange and queue alongside its
+      binding, so a poison message is set aside instead of blocking the queue.
+    cite:
+      - order-service/src/main/java/dev/gazerah/saga/order/config/RabbitConfig.java
+      - inventory-service/src/main/java/dev/gazerah/saga/inventory/config/RabbitConfig.java
+  - id: polyglot
+    text: >-
+      Two services are Java 21 and one is Kotlin, sharing the same event
+      contracts, which demonstrates the boundary is the message rather than the
+      language.
+    cite:
+      - payment-service/src/main/kotlin/dev/gazerah/saga/payment/config/RabbitConfig.kt
+      - payment-service/src/test/kotlin/dev/gazerah/saga/payment/payment/PaymentServiceTest.kt
+  - id: observability
+    text: >-
+      Each service exposes Micrometer metrics on the Actuator Prometheus
+      endpoint.
+    cite:
+      - order-service/src/main/resources/application.yml
+      - inventory-service/src/main/resources/application.yml
+      - payment-service/src/main/resources/application.yml
+  - id: local-topology
+    text: >-
+      The full topology, including the broker, runs locally from a single Compose
+      file.
+    cite:
+      - docker-compose.yml
+  - id: ci
+    text: >-
+      CI builds all three services and a separate workflow deploys them.
+    cite:
+      - .github/workflows/ci.yml
+      - .github/workflows/deploy.yml
+decisions:
+  - chose: >-
+      Choreography, with each service reacting to events.
+    rejected: >-
+      A central orchestrator issuing commands.
+    why: >-
+      With three services and two failure edges, a coordinator would add a fourth
+      moving part whose own availability becomes part of the transaction. The
+      saga is simple enough that its events are the coordination.
+  - chose: >-
+      A message contract per event type, duplicated across services.
+    rejected: >-
+      A shared library holding the event classes.
+    why: >-
+      Sharing a jar across independently deployed services couples their release
+      cycles. Duplicated contracts force the message shape to be explicit and make
+      a breaking change visible as a difference between two files.
+verification:
+  - what: >-
+      Unit and controller tests in each of the three services, covering order
+      creation, inventory reservation and payment decisions.
+    cite:
+      - order-service/src/test/java/dev/gazerah/saga/order/order/OrderServiceTest.java
+      - order-service/src/test/java/dev/gazerah/saga/order/order/OrderControllerTest.java
+      - inventory-service/src/test/java/dev/gazerah/saga/inventory/inventory/InventoryServiceTest.java
+      - payment-service/src/test/kotlin/dev/gazerah/saga/payment/payment/PaymentServiceTest.kt
+  - what: >-
+      Builds for all three services run in CI.
+    cite:
+      - .github/workflows/ci.yml
+limits:
+  - The compensation paths are modelled and unit-tested per service; there is no end-to-end test that kills a service mid-saga and asserts the observable outcome.
+  - Delivery is at-least-once, so consumers must be idempotent. Idempotency is implemented per service rather than enforced by a shared mechanism.
+  - The broker runs on a small VM for the hosted demo, so throughput and broker failover are not demonstrated.

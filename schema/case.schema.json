@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/gabrielchv/prova/schema/case.schema.json",
+  "title": "Prova case study",
+  "description": "Editor hint only. tool/validate.py is the authority and enforces additional rules that are deliberately hard to express here: every citation must resolve to a real file at the recorded commit, and limits may not be empty.",
+  "type": "object",
+  "required": [
+    "id", "name", "repo", "tagline", "role", "period", "pillars",
+    "stack", "problem", "approach", "claims", "decisions",
+    "verification", "limits"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Must match the filename stem."
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "repo": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+      "description": "owner/name on GitHub."
+    },
+    "tagline": { "type": "string", "minLength": 20, "maxLength": 240 },
+    "role": {
+      "type": "string",
+      "minLength": 10,
+      "description": "What this person actually did. Solo, or the specific slice of a team effort."
+    },
+    "period": { "type": "string", "minLength": 4 },
+    "pillars": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "enum": [
+          "messaging", "distributed-systems", "realtime", "fullstack",
+          "platform", "ai", "security", "data", "tooling"
+        ]
+      }
+    },
+    "stack": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "live_url": { "type": "string", "format": "uri" },
+    "problem": { "type": "string", "minLength": 40 },
+    "approach": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["title", "body"],
+        "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string", "minLength": 3 },
+          "body": { "type": "string", "minLength": 40 }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "cite"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "text": { "type": "string", "minLength": 20, "maxLength": 280 },
+          "cite": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 },
+            "description": "Repo-relative paths, directory prefixes ending in '/', or globs. Must resolve to at least one real file."
+          }
+        }
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "minItems": 1,
+      "description": "A decision with no rejected alternative is marketing, not engineering.",
+      "items": {
+        "type": "object",
+        "required": ["chose", "rejected", "why"],
+        "additionalProperties": false,
+        "properties": {
+          "chose": { "type": "string", "minLength": 10 },
+          "rejected": { "type": "string", "minLength": 3 },
+          "why": { "type": "string", "minLength": 40 }
+        }
+      }
+    },
+    "verification": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["what", "cite"],
+        "additionalProperties": false,
+        "properties": {
+          "what": { "type": "string", "minLength": 15 },
+          "cite": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+        }
+      }
+    },
+    "limits": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The only section that requires no citation: an admission does not need proof.",
+      "items": { "type": "string", "minLength": 20 }
+    }
+  }
+}

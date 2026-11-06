@@ -1,0 +1,144 @@
+id: jobpipe
+name: jobpipe
+repo: gabrielchv/jobpipe
+tagline: >-
+  An application pipeline tracker built on the JVM, where the status state
+  machine is enforced on the server because a client-side rule is a suggestion.
+role: >-
+  Independent build: Spring Boot service, JWT security, Flyway migrations, the
+  scheduled reminder job, STOMP notifications and the Vue client it serves.
+period: "2026-10"
+pillars:
+  - fullstack
+  - security
+  - realtime
+stack:
+  - Java 21
+  - Spring Boot 3
+  - Spring Security
+  - Spring Data JPA
+  - Flyway
+  - PostgreSQL
+  - STOMP WebSocket
+  - Vue 3
+  - Cloud Run
+problem: >-
+  A job search is a pipeline with rules. Applications move forward through stages,
+  some transitions are nonsense, and follow-ups get forgotten precisely when a
+  recruiter goes quiet. Storing a free-text status column means the rules exist
+  only in the UI, which means they do not exist.
+approach:
+  - title: Transitions are validated on the server
+    body: >-
+      The status enum owns its own legal transitions, and an illegal move raises a
+      dedicated exception that the API translates into a rejection. The client can
+      only offer what the server will accept.
+  - title: Reminders are a scheduled job, not a cron script
+    body: >-
+      A scheduler inside the service finds applications that have gone quiet and
+      pushes a live notification over a user-scoped STOMP queue, recording the
+      event in the application timeline.
+  - title: One deployable unit
+    body: >-
+      The Vue build is copied into the Spring Boot jar's static resources at image
+      build time, so there is one container, one service and no cross-origin
+      configuration to get wrong.
+claims:
+  - id: state-machine
+    text: >-
+      The application status state machine is defined and enforced server-side,
+      with an illegal transition raising a dedicated exception type.
+    cite:
+      - backend/src/main/java/dev/gazerah/jobpipe/application/ApplicationStatus.java
+      - backend/src/main/java/dev/gazerah/jobpipe/common/IllegalTransitionException.java
+      - backend/src/main/java/dev/gazerah/jobpipe/application/JobApplicationService.java
+  - id: state-machine-tested
+    text: >-
+      The transition rules are covered by unit tests on the enum and by service
+      tests that exercise the rejection path.
+    cite:
+      - backend/src/test/java/dev/gazerah/jobpipe/application/ApplicationStatusTest.java
+      - backend/src/test/java/dev/gazerah/jobpipe/application/JobApplicationServiceTest.java
+  - id: jwt
+    text: >-
+      Authentication uses JWT access and refresh tokens with typed token
+      purposes and a filter in the Spring Security chain.
+    cite:
+      - backend/src/main/java/dev/gazerah/jobpipe/auth/JwtService.java
+      - backend/src/main/java/dev/gazerah/jobpipe/auth/TokenType.java
+      - backend/src/main/java/dev/gazerah/jobpipe/auth/JwtAuthenticationFilter.java
+      - backend/src/main/java/dev/gazerah/jobpipe/config/SecurityConfig.java
+  - id: migrations
+    text: >-
+      The schema is versioned with Flyway migrations rather than generated at
+      startup by an ORM.
+    cite:
+      - backend/src/main/resources/db/migration/V1__init.sql
+      - backend/pom.xml
+  - id: reminders
+    text: >-
+      A scheduled service finds applications with no recent contact and sends a
+      user-scoped notification over STOMP, recorded as a timeline activity.
+    cite:
+      - backend/src/main/java/dev/gazerah/jobpipe/reminder/ReminderService.java
+      - backend/src/main/java/dev/gazerah/jobpipe/ws/NotificationService.java
+      - backend/src/main/java/dev/gazerah/jobpipe/ws/WebSocketConfig.java
+      - frontend/src/composables/useReminders.ts
+  - id: caching
+    text: >-
+      Dashboard statistics are served through a time-bounded Caffeine cache
+      rather than recomputed on every request.
+    cite:
+      - backend/src/main/java/dev/gazerah/jobpipe/config/CacheConfig.java
+      - backend/src/main/java/dev/gazerah/jobpipe/application/DashboardController.java
+  - id: metrics
+    text: >-
+      Application metrics are exposed through Micrometer on the Actuator
+      Prometheus endpoint.
+    cite:
+      - backend/src/main/resources/application.yml
+      - backend/pom.xml
+  - id: full-system-test
+    text: >-
+      An integration test exercises the API end to end through the Spring context
+      rather than mocking the web layer away.
+    cite:
+      - backend/src/test/java/dev/gazerah/jobpipe/ApiIntegrationTest.java
+decisions:
+  - chose: >-
+      Server-enforced transitions owned by the status enum.
+    rejected: >-
+      A free-text status column validated in the Vue client.
+    why: >-
+      A rule that only exists in the interface is not a rule; it is a convention,
+      and it disappears the first time anything other than the interface writes to
+      the database.
+  - chose: >-
+      Serving the built SPA from the Spring Boot jar.
+    rejected: >-
+      Two Cloud Run services with CORS between them.
+    why: >-
+      There is one user-facing application here. Splitting it into two deployables
+      would add a second failure domain and a CORS policy in exchange for
+      independent scaling that this workload does not need.
+verification:
+  - what: >-
+      Unit tests for the status transitions and service-level rejection of illegal
+      moves.
+    cite:
+      - backend/src/test/java/dev/gazerah/jobpipe/application/ApplicationStatusTest.java
+      - backend/src/test/java/dev/gazerah/jobpipe/application/JobApplicationServiceTest.java
+  - what: >-
+      A Spring-context integration test over the HTTP API.
+    cite:
+      - backend/src/test/java/dev/gazerah/jobpipe/ApiIntegrationTest.java
+  - what: >-
+      The same transition rules mirrored on the client and tested there, so the UI
+      does not offer moves the server will refuse.
+    cite:
+      - frontend/src/domain/status.ts
+      - frontend/src/domain/__tests__/status.spec.ts
+limits:
+  - Token refresh has no server-side revocation list, so a stolen refresh token remains usable until it expires.
+  - Reminder scheduling assumes a single running instance; the scheduled job is not guarded against overlap across simultaneously scaled instances.
+  - The cache is in-process, so statistics can be stale for up to the cache TTL and are not shared between instances.

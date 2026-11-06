@@ -1,0 +1,145 @@
+id: inquilino-ia
+name: InquilinoIA
+repo: gabrielchv/inquilino-ia
+tagline: >-
+  RAG over Brazilian tenancy law where the citation is verified in code against
+  the statute, because asking a model to be careful is not a verification step.
+role: >-
+  Independent build: ingestion, retrieval, the verification layer, the evaluation
+  set, the FastAPI backend, the Vue client and the GCP deployment.
+period: "2026-08"
+pillars:
+  - ai
+  - data
+  - platform
+stack:
+  - Python
+  - FastAPI
+  - Vue 3
+  - Gemini
+  - pgvector
+  - Supabase
+  - Terraform
+  - Cloud Run
+problem: >-
+  Legal questions need answers that can be checked. A model that produces a
+  confident summary with a plausible-looking article number is worse than no
+  answer at all, because the reader has no way to tell the difference without
+  opening the statute themselves. Grounding has to be mechanical, not
+  stylistic.
+approach:
+  - title: Two calls, each doing one job
+    body: >-
+      One call streams the prose so the interface feels alive. A second, separate
+      structured-output call extracts article and quote pairs for verification.
+      Parsing citation tags out of a live token stream would have been cheaper and
+      much more fragile.
+  - title: Verification is a substring match
+    body: >-
+      Every quoted passage is normalized and matched against the actual article
+      text in Python. If the quote is not there, the claim is flagged. The model's
+      confidence is never the gate.
+  - title: Ingestion refuses to carry dead law
+    body: >-
+      The scraper strips revoked amendments in both of the ways the source marks
+      them, so historical wording cannot be retrieved and presented as current
+      law.
+claims:
+  - id: citation-verified
+    text: >-
+      Every generated claim must carry a verbatim quote that is checked against the
+      statute text by normalized substring match in Python before it is shown.
+    cite:
+      - app/verify.py
+      - tests/test_verify.py
+  - id: two-calls
+    text: >-
+      Answer streaming and citation extraction are separate model calls, so
+      citation pairs come from a structured-output call rather than being parsed
+      out of the token stream.
+    cite:
+      - app/chat.py
+      - app/gemini_client.py
+  - id: revoked-amendments
+    text: >-
+      Ingestion strips revoked amendments in both the HTML-tag and CSS
+      line-through forms the source uses, so superseded wording never enters the
+      index as current law.
+    cite:
+      - ingest/fetch_law.py
+      - tests/test_fetch_law.py
+  - id: reproducible-seed
+    text: >-
+      The chunked corpus is committed as a reproducible seed rather than being
+      rebuilt on every deploy, so the indexed law is versioned with the code.
+    cite:
+      - ingest/lei_8245_chunks.json
+      - ingest/embed_and_load.py
+  - id: eval-set
+    text: >-
+      A question set and a runner exist to measure answer quality against the
+      corpus, rather than relying on spot checks.
+    cite:
+      - eval/questions.yaml
+      - eval/run_eval.py
+  - id: api
+    text: >-
+      The service exposes streaming answers over SSE through a FastAPI
+      application, with health and chat endpoints under test.
+    cite:
+      - app/main.py
+      - app/retrieval.py
+      - tests/test_chat_api.py
+      - tests/test_health.py
+  - id: client
+    text: >-
+      The Vue client renders citation badges and a source panel beside each
+      answer, so the evidence is visible in the interface rather than implied.
+    cite:
+      - frontend/src/components/CitationBadge.vue
+      - frontend/src/components/SourcePanel.vue
+      - frontend/src/composables/useSSE.js
+  - id: deploy
+    text: >-
+      The vector store schema is declared alongside the Terraform that provisions
+      the Cloud Run service.
+    cite:
+      - infra/schema.sql
+      - infra/cloud_run.tf
+      - Dockerfile
+decisions:
+  - chose: >-
+      A second structured-output call dedicated to extracting citations.
+    rejected: >-
+      Parsing citation tags out of the streamed answer.
+    why: >-
+      A live token stream gives no reliable place to cut: a tag can arrive split
+      across chunks, and a failed parse would be indistinguishable from an answer
+      with no citations. A separate call returns a shape that either validates or
+      does not.
+  - chose: >-
+      Verifying quotes by normalized substring match in Python.
+    rejected: >-
+      Asking the model to self-report whether its claim is supported.
+    why: >-
+      Self-assessment by the same model that produced the claim is not
+      independent evidence. A substring match against the statute is checkable by
+      anyone reading the code.
+verification:
+  - what: >-
+      Tests for the verification layer, the ingestion scraper, the chat API and
+      health endpoints.
+    cite:
+      - tests/test_verify.py
+      - tests/test_fetch_law.py
+      - tests/test_chat_api.py
+      - tests/test_health.py
+  - what: >-
+      An evaluation runner scores answers against a fixed question set.
+    cite:
+      - eval/run_eval.py
+      - eval/questions.yaml
+limits:
+  - The corpus is one statute. Retrieval quality on a broader or messier legal corpus is not demonstrated.
+  - Verification proves a quote exists in the cited text. It does not prove the quote actually supports the claim made around it.
+  - Chunking and embedding choices were made once and are not benchmarked against alternatives.

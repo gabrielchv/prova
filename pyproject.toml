@@ -1,0 +1,12 @@
+[project]
+name = "prova"
+version = "1.0.0"
+description = "A portfolio whose claims must cite files that exist in the repository."
+requires-python = ">=3.11"
+dependencies = ["pyyaml>=6.0"]
+
+[tool.prova]
+# Directory layout, kept here so the tooling never hardcodes a second copy.
+cases = "cases"
+evidence = "evidence"
+build = "build"

@@ -1,0 +1,128 @@
+id: hookrelay
+name: hookrelay
+repo: gabrielchv/hookrelay
+tagline: >-
+  Reliable webhook delivery as infrastructure. The retry decision belongs to the
+  sender, not to whoever happens to be calling the customer's flaky endpoint.
+role: >-
+  Independent build: architecture, implementation, tests, Kubernetes manifests,
+  Terraform and the local demo harness.
+period: "2026-11"
+pillars:
+  - messaging
+  - distributed-systems
+  - platform
+stack:
+  - TypeScript
+  - Kafka
+  - AWS SQS
+  - DynamoDB
+  - Redis
+  - Docker
+  - Kubernetes
+  - Terraform
+problem: >-
+  Calling a customer's HTTP endpoint directly from an application means
+  inheriting every one of that customer's outages. The failure itself is not the
+  interesting part. The interesting part is that the caller silently takes
+  ownership of a retry policy, a deduplication key, a rate limit and a
+  dead-letter queue for someone else's server, and none of that is in the
+  original scope of the feature.
+approach:
+  - title: One port, two transports
+    body: >-
+      The broker is an interface with Kafka and SQS implementations sitting
+      behind it. Nothing upstream of the port knows which one is running, so the
+      same API, worker and test suite run against either.
+  - title: Retry as one explicit policy
+    body: >-
+      Backoff lives in a single module rather than being spread across call
+      sites, so "how hard do we try" is a decision that can be read, tested and
+      changed in one place.
+  - title: Signatures the receiver can verify
+    body: >-
+      Every delivery is HMAC-SHA256 signed over the bytes actually sent, with a
+      timestamp inside the signature, so a receiver can reject replays and
+      rotate secrets without downtime.
+claims:
+  - id: at-least-once
+    text: >-
+      At-least-once delivery with a stable X-Hookrelay-Delivery header so
+      receivers can deduplicate. Exactly-once is explicitly not promised.
+    cite:
+      - src/delivery/client.ts
+      - docs/architecture.md
+  - id: jitter
+    text: >-
+      Exponential backoff with full jitter, so a fleet of workers does not retry
+      a struggling endpoint in lockstep.
+    cite:
+      - src/core/backoff.ts
+      - tests/backoff.test.ts
+  - id: dead-letter
+    text: >-
+      Dead-lettering after the attempt limit, preserving the last status code and
+      error on the delivery record.
+    cite:
+      - src/worker/worker.ts
+  - id: rate-limit
+    text: >-
+      Per-endpoint sliding-window rate limiting. A throttled delivery is
+      re-queued without consuming one of its attempts.
+    cite:
+      - src/store/redis.ts
+  - id: signing
+    text: >-
+      HMAC-SHA256 request signing in a Stripe-style t=...,v1=... format, with
+      replay protection and multi-signature support for secret rotation.
+    cite:
+      - src/core/signature.ts
+      - tests/signature.test.ts
+  - id: idempotent-ingest
+    text: >-
+      Idempotent ingestion through a caller-supplied Idempotency-Key, so a
+      retried producer call does not fan out twice.
+    cite:
+      - src/api/server.ts
+  - id: local-first
+    text: >-
+      The entire system runs locally with no cloud account: Redis, Kafka and an
+      AWS mock via Compose, with Kubernetes manifests for the same stack.
+    cite:
+      - docker-compose.yml
+      - k8s/local/00-prereqs.yaml
+      - scripts/demo.ts
+decisions:
+  - chose: >-
+      At-least-once delivery with a stable, documented delivery identifier.
+    rejected: Exactly-once delivery.
+    why: >-
+      Exactly-once across a network boundary requires the receiver to participate
+      in the protocol. Promising it would be false the first time an endpoint
+      acknowledges after its own commit has already failed.
+  - chose: >-
+      A transport port with both Kafka and SQS implementations.
+    rejected: Committing to a single broker.
+    why: >-
+      SQS is what most teams already have; Kafka is what teams with real volume
+      ask for. Keeping the choice behind a port makes it a deployment detail
+      rather than an architectural bet.
+verification:
+  - what: >-
+      Retry, dead-letter and signature verification exercised end to end against
+      a sink configured to fail its first two attempts.
+    cite:
+      - scripts/demo.ts
+      - src/services/sink.ts
+  - what: >-
+      Unit coverage of backoff, signature verification, the dispatcher, routing
+      and the HTTP API.
+    cite:
+      - tests/backoff.test.ts
+      - tests/signature.test.ts
+      - tests/dispatcher.test.ts
+      - tests/api.test.ts
+limits:
+  - Delivery state is DynamoDB-shaped, but the local path runs against a mock, so this makes no claim about behaviour under real AWS throttling.
+  - There is no hosted deployment; running the demo requires Docker.
+  - Ordering guarantees within a partition are inherited from the broker and are not re-exposed as an application-level promise.

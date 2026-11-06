@@ -1,0 +1,44 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly drift check: repositories change underneath claims.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Test the validator
+        run: make test
+
+      - name: Verify committed evidence
+        run: make verify
+
+      - name: Re-collect evidence and check for drift
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: make refresh
+
+      - name: Upload rendered site
+        uses: actions/upload-artifact@v4
+        with:
+          name: prova-site
+          path: build/
+          retention-days: 14

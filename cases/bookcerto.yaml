@@ -1,0 +1,140 @@
+id: bookcerto
+name: bookcerto
+repo: gabrielchv/bookcerto
+live_url: https://bookcerto-e77phu6mxq-uc.a.run.app/booking/aurora
+tagline: >-
+  Multi-tenant clinic and barbershop scheduling where the double-booking
+  guarantee lives in the database, not in a polite application check that two
+  concurrent requests can both pass.
+role: >-
+  Independent build: schema and migrations, booking transaction, availability
+  computation, tenant resolution, background reminders, live dashboard and the
+  Cloud Run deployment.
+period: "2026-11"
+pillars:
+  - fullstack
+  - data
+  - platform
+stack:
+  - TypeScript
+  - Next.js 15
+  - Postgres
+  - Drizzle
+  - BullMQ
+  - Redis
+  - Server-Sent Events
+  - Terraform
+  - Cloud Run
+problem: >-
+  Two clients can book the same slot at the same second. An application-level
+  check — read, confirm nothing overlaps, insert — is a race by construction, and
+  it fails exactly when the calendar is busiest, which is when it matters most.
+  Multi-tenancy makes it worse: the correctness rule now has to be enforced per
+  tenant without letting one tenant's query see another's rows.
+approach:
+  - title: The overlap rule is a database constraint
+    body: >-
+      A PostgreSQL exclusion constraint rejects overlapping bookings for the same
+      staff member directly in the table definition, so concurrent transactions
+      cannot both succeed. The application handles the conflict; it does not
+      prevent it.
+  - title: Partial constraints that respect cancellation
+    body: >-
+      The constraint is scoped to booked rows, so a cancelled appointment frees
+      the slot without weakening the guarantee for live ones.
+  - title: Tenant resolution is a server concern
+    body: >-
+      The current tenant and the caller's role are resolved server-side from the
+      session and membership table, never trusted from a URL parameter.
+claims:
+  - id: overlap-constraint
+    text: >-
+      Overlapping appointments for the same staff member are rejected by a
+      PostgreSQL GiST exclusion constraint on a time range, not by a read-then-write
+      check in application code.
+    cite:
+      - drizzle/0003_partial_exclusion.sql
+      - drizzle/0001_exclusion.sql
+  - id: partial-on-status
+    text: >-
+      The exclusion constraint applies only to booked rows, so cancelling frees the
+      slot without weakening the guarantee for active bookings.
+    cite:
+      - drizzle/0003_partial_exclusion.sql
+  - id: row-level-security
+    text: >-
+      Tenant separation is reinforced in the database by row-level security
+      policies applied through a migration.
+    cite:
+      - drizzle/0002_rls.sql
+  - id: tenant-from-session
+    text: >-
+      Tenant and role are resolved from the session and the memberships table on
+      the server, not from a client-supplied identifier.
+    cite:
+      - src/lib/tenant.ts
+  - id: booking-transaction
+    text: >-
+      The booking path is isolated in one module with its own test suite alongside
+      the availability computation.
+    cite:
+      - src/lib/booking.ts
+      - src/lib/booking.test.ts
+      - src/lib/availability.ts
+      - src/lib/availability.test.ts
+  - id: reminders
+    text: >-
+      Appointment reminders run as queued background jobs rather than inside the
+      request that created the booking.
+    cite:
+      - src/lib/queue.ts
+      - src/lib/reminders.ts
+  - id: live-dashboard
+    text: >-
+      The owner dashboard updates live over Server-Sent Events instead of polling.
+    cite:
+      - src/app/api/events/route.ts
+      - src/lib/events.ts
+      - src/lib/useRealtime.ts
+  - id: cost-ceiling
+    text: >-
+      The project is constrained to a stated monthly cost ceiling, with a guard
+      service that acts on a budget-breach notification rather than only alerting.
+    cite:
+      - docs/COST-CEILING.md
+      - infra/cost-guard/main.py
+      - infra/cost-guard/README.md
+decisions:
+  - chose: >-
+      A database exclusion constraint for the overlap rule.
+    rejected: >-
+      Checking availability and then inserting inside application code.
+    why: >-
+      A read-then-write check is only correct if no other transaction interleaves,
+      which is false under load. Putting the rule in the schema makes concurrency
+      the database's job, which is what it is good at.
+  - chose: >-
+      A deliberately small infrastructure footprint under an explicit cost cap.
+    rejected: >-
+      A minimum-instance deployment that would be faster and much more expensive.
+    why: >-
+      A demo that idles at a fixed monthly cost is a demo that quietly gets
+      switched off. The ceiling is written down so it cannot be raised by accident.
+verification:
+  - what: >-
+      Browser end-to-end coverage of the public booking flow.
+    cite:
+      - e2e/booking.spec.ts
+  - what: >-
+      Unit coverage of availability computation and the booking transaction.
+    cite:
+      - src/lib/availability.test.ts
+      - src/lib/booking.test.ts
+  - what: >-
+      CI on every change, with a separate deploy workflow.
+    cite:
+      - .github/workflows/ci.yml
+limits:
+  - Tenancy is enforced per request through session resolution plus row-level security; there is no separate database per tenant, so a policy mistake has a wider blast radius than physical isolation would.
+  - Reminder delivery is a queued job against a free-tier Redis instance, so exactly-once delivery of a reminder is not guaranteed under Redis eviction.
+  - The cost guard stops instances and forces scale-to-zero. It deliberately never deletes resources or disables billing.

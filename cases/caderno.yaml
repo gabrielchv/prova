@@ -1,0 +1,133 @@
+id: caderno
+name: caderno
+repo: gabrielchv/caderno
+tagline: >-
+  Real-time collaborative editing where the hard part is not the typing — it is
+  conflict semantics, observability and the accessibility gate nobody wants to
+  own.
+role: >-
+  Independent build: the shared sync package, the Socket.IO realtime service, the
+  Next.js client, the test pyramid and the Cloud Run deployment.
+period: "2026-09"
+pillars:
+  - realtime
+  - fullstack
+  - platform
+stack:
+  - TypeScript
+  - Next.js 15
+  - React 19
+  - Socket.IO
+  - pnpm monorepo
+  - OpenTelemetry
+  - Prometheus
+  - Playwright
+  - Terraform
+problem: >-
+  Two people editing one document is a distributed systems problem wearing a
+  text editor's clothes. The visual part is easy. The part that breaks is what
+  happens when a patch arrives for a version that no longer exists, and whether
+  the product tells the user the truth when that happens.
+approach:
+  - title: The sync rules live in their own package
+    body: >-
+      Patch application and version checks are a shared library with its own
+      tests, consumed by both the server and the browser. The server is the
+      authority; the client does not get a second opinion.
+  - title: A stale patch is rejected, not merged
+    body: >-
+      When a patch arrives against an old version the server returns the
+      authoritative document rather than attempting a guess. The interface then
+      says "Conflict" instead of silently losing an edit.
+  - title: The test pyramid is enforced in CI
+    body: >-
+      Unit tests for patch semantics, an integration test with two real Socket.IO
+      clients over the wire, and browser tests for convergence, presence and
+      accessibility.
+claims:
+  - id: versioned-sync
+    text: >-
+      Document patches are applied and version-checked in a shared package used by
+      both client and server, with dedicated conflict tests.
+    cite:
+      - packages/shared/src/sync.ts
+      - packages/shared/src/sync.test.ts
+      - packages/shared/src/types.ts
+  - id: over-the-wire
+    text: >-
+      An integration test runs a real Socket.IO server with real clients joining a
+      room, growing the roster and converging on one document.
+    cite:
+      - apps/realtime/src/sync.integration.test.ts
+      - apps/realtime/src/server.ts
+  - id: presence
+    text: >-
+      Presence and remote cursors are maintained by the realtime service and
+      surfaced live in the editor.
+    cite:
+      - apps/realtime/src/presence.ts
+      - apps/web/src/components/Presence.tsx
+  - id: a11y-gate
+    text: >-
+      Accessibility is a build gate, not a checklist: axe fails the browser suite
+      on any serious or critical violation.
+    cite:
+      - apps/web/e2e/a11y.spec.ts
+  - id: observability
+    text: >-
+      Structured logs, a Prometheus endpoint with custom histograms and OTLP trace
+      export in the realtime service; web vitals forwarded from the client into
+      the same registry.
+    cite:
+      - apps/realtime/src/logger.ts
+      - apps/realtime/src/tracing.ts
+      - apps/realtime/src/health.ts
+      - apps/web/src/app/api/vitals/route.ts
+      - apps/web/src/components/VitalsReporter.tsx
+  - id: perf-budget
+    text: >-
+      A Lighthouse budget gates performance, accessibility, best practices and
+      SEO at 95 or above.
+    cite:
+      - lighthouserc.json
+  - id: deployment
+    text: >-
+      Two Cloud Run services deployed from Terraform behind a keyless CI/CD
+      workflow.
+    cite:
+      - terraform/main.tf
+      - terraform/deploy.sh
+      - .github/workflows/cd.yml
+decisions:
+  - chose: >-
+      A shared, tested sync package with the server as the single source of truth.
+    rejected: >-
+      Merging patches optimistically on the client.
+    why: >-
+      Optimistic merging hides the conflict exactly when the user most needs to
+      know about it. A rejected patch and an honest "Conflict" state is more
+      useful than a document that is quietly wrong.
+  - chose: >-
+      A monorepo with explicit workspace boundaries.
+    rejected: >-
+      A single Next.js app holding both the UI and the socket server.
+    why: >-
+      The realtime service has different scaling, health and deploy characteristics
+      from the web app. Sharing a process would have hidden that difference until
+      it mattered.
+verification:
+  - what: >-
+      Two isolated browser contexts converge on one document, the presence roster
+      reconciles, and the accessibility gate blocks regressions on both the home
+      and room pages.
+    cite:
+      - apps/web/e2e/collab.spec.ts
+      - apps/web/e2e/a11y.spec.ts
+  - what: >-
+      Typecheck, lint, unit and integration tests run in CI across all workspaces.
+    cite:
+      - .github/workflows/ci.yml
+limits:
+  - The sync model is versioned patch application, not a CRDT. It is correct for the conflict policy it implements and would not scale to offline editing or peer-to-peer sync without a redesign.
+  - Persistence is in-memory in the realtime service, so a restart loses room state.
+  - The Lighthouse budget is run manually until a hosted preview URL exists; it is not yet a blocking gate on every pull request.

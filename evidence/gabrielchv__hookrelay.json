@@ -1,0 +1,94 @@
+{
+  "repo": "gabrielchv/hookrelay",
+  "collected_at": "2026-11-06T16:53:29Z",
+  "default_branch": "main",
+  "head_sha": "030d15826dc4407576d0ef22578d4d91f473c3fb",
+  "head_date": "2026-11-06T12:42:05Z",
+  "pushed_at": "2026-11-06T12:42:12Z",
+  "homepage": null,
+  "primary_language": "TypeScript",
+  "languages": {
+    "TypeScript": 87410,
+    "HCL": 5845,
+    "Dockerfile": 640
+  },
+  "file_count": 49,
+  "tree_truncated": false,
+  "paths": [
+    ".dockerignore",
+    ".github/workflows/ci.yml",
+    ".gitignore",
+    "Dockerfile",
+    "LICENSE",
+    "README.md",
+    "docker-compose.yml",
+    "docs/architecture.md",
+    "k8s/00-namespace.yaml",
+    "k8s/05-redis.yaml",
+    "k8s/10-api.yaml",
+    "k8s/20-worker.yaml",
+    "k8s/local/00-prereqs.yaml",
+    "k8s/prod/config.example.yaml",
+    "package.json",
+    "pnpm-lock.yaml",
+    "scripts/demo.ts",
+    "scripts/provision.ts",
+    "src/api/auth.ts",
+    "src/api/server.ts",
+    "src/broker/index.ts",
+    "src/broker/kafka.ts",
+    "src/broker/sqs.ts",
+    "src/config.ts",
+    "src/core/backoff.ts",
+    "src/core/dispatcher.ts",
+    "src/core/signature.ts",
+    "src/delivery/client.ts",
+    "src/logger.ts",
+    "src/main.ts",
+    "src/ports.ts",
+    "src/services/sink.ts",
+    "src/store/dynamo.ts",
+    "src/store/redis.ts",
+    "src/types.ts",
+    "src/worker/worker.ts",
+    "terraform/.terraform.lock.hcl",
+    "terraform/main.tf",
+    "terraform/outputs.tf",
+    "terraform/variables.tf",
+    "tests/api.test.ts",
+    "tests/auth.test.ts",
+    "tests/backoff.test.ts",
+    "tests/dispatcher.test.ts",
+    "tests/signature.test.ts",
+    "tests/support/fakes.ts",
+    "tsconfig.build.json",
+    "tsconfig.json",
+    "vitest.config.ts"
+  ],
+  "shape": {
+    "ci_workflows": [
+      ".github/workflows/ci.yml"
+    ],
+    "tests": [
+      "tests/api.test.ts",
+      "tests/auth.test.ts",
+      "tests/backoff.test.ts",
+      "tests/dispatcher.test.ts",
+      "tests/signature.test.ts",
+      "tests/support/fakes.ts"
+    ],
+    "terraform": [
+      "terraform/main.tf",
+      "terraform/outputs.tf",
+      "terraform/variables.tf"
+    ],
+    "containers": [
+      ".dockerignore",
+      "Dockerfile",
+      "docker-compose.yml"
+    ],
+    "docs": [
+      "docs/architecture.md"
+    ]
+  }
+}
