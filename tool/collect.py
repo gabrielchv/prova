@@ -107,6 +107,9 @@ def collect_repo(repo: str, token: str | None) -> dict:
         "repo": repo,
         "collected_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "default_branch": branch,
+        # Recorded because it decides whether a citation is checkable by a reader
+        # at all. The validator refuses cases whose repository is not public.
+        "private": bool(meta.get("private", False)),
         "head_sha": head.get("sha"),
         "head_date": (head.get("commit", {}).get("committer", {}) or {}).get("date"),
         "pushed_at": meta.get("pushed_at"),

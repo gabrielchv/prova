@@ -308,32 +308,6 @@
       "claim_count": 8,
       "verified_commit": "22168562cc380558cb92410dbde84202d14550fc",
       "case_file": "cases/task-organizer.yaml"
-    },
-    {
-      "id": "virt-ic",
-      "name": "VIRT-IC",
-      "repo": "gabrielchv/virt-ic",
-      "tagline": "One packet, five vantage points. Correlating the same datagram across host, bridge and container namespaces to explain how containers actually talk.",
-      "tagline_pt": "Um pacote, cinco pontos de vista. Correlacionando o mesmo datagrama entre host, bridge e namespaces de containers para explicar como containers realmente conversam.",
-      "role": "Undergraduate research project (Iniciação Científica): capture harness, the correlation key, phase segmentation and the analysis output.",
-      "period": "2026-08",
-      "pillars": [
-        "platform",
-        "data",
-        "tooling"
-      ],
-      "stack": [
-        "Python",
-        "Docker Compose",
-        "tcpdump",
-        "tshark",
-        "nsenter",
-        "Linux network namespaces"
-      ],
-      "live_url": null,
-      "claim_count": 7,
-      "verified_commit": "90c8dc23c98d4b1878db57da158f61b7af70b603",
-      "case_file": "cases/virt-ic.yaml"
     }
   ]
 }

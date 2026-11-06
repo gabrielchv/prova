@@ -1,7 +1,8 @@
 {
   "repo": "gabrielchv/RAG-IC",
-  "collected_at": "2026-11-06T17:03:26Z",
+  "collected_at": "2026-11-06T17:10:25Z",
   "default_branch": "main",
+  "private": false,
   "head_sha": "5a813ffc33e147fac4ba76b50e917d65563bab09",
   "head_date": "2026-08-20T19:03:54Z",
   "pushed_at": "2026-08-20T19:24:04Z",

@@ -1,7 +1,8 @@
 {
   "repo": "gabrielchv/spring-rabbit-saga",
-  "collected_at": "2026-11-06T17:03:36Z",
+  "collected_at": "2026-11-06T17:10:36Z",
   "default_branch": "master",
+  "private": false,
   "head_sha": "76b92f9b3eecd9b75fad8199d9ecfa18c9fd1cfe",
   "head_date": "2026-10-09T16:38:38Z",
   "pushed_at": "2026-10-09T16:38:40Z",

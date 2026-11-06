@@ -1,7 +1,8 @@
 {
   "repo": "gabrielchv/bookcerto",
-  "collected_at": "2026-11-06T17:03:27Z",
+  "collected_at": "2026-11-06T17:10:27Z",
   "default_branch": "master",
+  "private": false,
   "head_sha": "76ec49216d172660d402ac290458383816a47722",
   "head_date": "2026-11-06T12:59:15Z",
   "pushed_at": "2026-11-06T12:59:17Z",

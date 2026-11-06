@@ -53,6 +53,7 @@ drift from the code, because drift is a build failure.
 | Claim ids are unique within a case | error |
 | No overclaiming vocabulary ("world-class", "10x", …) | warning |
 | A Portuguese tagline is present | warning |
+| The repository is public, so citations can actually be opened | error |
 | At least one claim or verification cites a test | warning |
 
 `limits` is the one section that needs no citation. An admission does not
@@ -60,7 +61,7 @@ require proof, and a project with no stated limits has not been examined.
 
 ## The cases
 
-Twelve repositories, 92 claims, 289 file citations.
+Eleven repositories, 85 claims, 275 file citations.
 
 - **hookrelay** — reliable webhook delivery, Kafka/SQS behind one port, retries, dead-lettering, signed payloads
 - **status-page** — uptime monitoring with an incident state machine and an SSE status page
@@ -73,7 +74,6 @@ Twelve repositories, 92 claims, 289 file citations.
 - **Task Helper AI** — task assistant whose only write path is a pure reducer with one invariant
 - **Obsidian Chatter** — chat over a knowledge vault where writes come back as reversible git commits
 - **RAG-IC** — local-first retrieval over safety documentation that refuses instead of improvising
-- **VIRT-IC** — correlating one packet across five vantage points to explain container networking
 
 ## Quickstart
 

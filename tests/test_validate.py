@@ -209,6 +209,14 @@ class RuleTests(unittest.TestCase):
             validate.check_case(base_case(), report, set(), set())
         self.assertTrue(any("no evidence" in error for error in report.errors))
 
+    def test_private_repository_is_an_error(self):
+        # A citation nobody can open is not evidence; it only looks like evidence.
+        private = dict(EVIDENCE, private=True)
+        report = validate.Report()
+        with patch.object(validate, "load_evidence", return_value=private):
+            validate.check_case(base_case(), report, set(), set())
+        self.assert_error(report, "private repository")
+
 
 if __name__ == "__main__":
     unittest.main()

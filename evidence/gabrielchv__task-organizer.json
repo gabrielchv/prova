@@ -1,7 +1,8 @@
 {
   "repo": "gabrielchv/task-organizer",
-  "collected_at": "2026-11-06T17:03:40Z",
+  "collected_at": "2026-11-06T17:10:39Z",
   "default_branch": "main",
+  "private": false,
   "head_sha": "22168562cc380558cb92410dbde84202d14550fc",
   "head_date": "2026-09-09T23:07:25Z",
   "pushed_at": "2026-10-21T22:26:45Z",

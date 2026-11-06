@@ -1,7 +1,8 @@
 {
   "repo": "gabrielchv/hookrelay",
-  "collected_at": "2026-11-06T17:03:31Z",
+  "collected_at": "2026-11-06T17:10:30Z",
   "default_branch": "main",
+  "private": false,
   "head_sha": "030d15826dc4407576d0ef22578d4d91f473c3fb",
   "head_date": "2026-11-06T12:42:05Z",
   "pushed_at": "2026-11-06T12:42:12Z",

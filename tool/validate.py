@@ -177,6 +177,18 @@ def check_case(case: dict, report: Report, seen_ids: set[str], seen_stems: set[s
     if evidence and evidence.get("tree_truncated"):
         report.warn(label, "the recorded tree is truncated; later paths may be unresolvable")
 
+    # The whole premise is that a reader can open a citation and see the file.
+    # A private repository makes every citation in this case unopenable to that
+    # reader, which is worse than an unverified claim: it looks checkable and is
+    # not. Collection needs a token with private scope to have got this far, so
+    # this is caught here rather than trusted to the collector's permissions.
+    if evidence and evidence.get("private"):
+        report.error(
+            label,
+            f"{repo} is a private repository, so no citation here can be opened by a "
+            "reader; make it public or remove the case",
+        )
+
     # --------------------------------------------------------------- prose
     for key in ("tagline", "role", "period", "problem"):
         value = case.get(key)
@@ -339,7 +351,7 @@ def main() -> int:
     print("\n".join(report.lines))
     print(
         f"\ncitations  {report.resolved}/{report.citations} resolved  ·  "
-        f"claims {report.claims}  ·  claims citing tests {report.tests_cited}"
+        f"claims {report.claims}  ·  citations to tests {report.tests_cited}"
     )
 
     if report.warnings:
