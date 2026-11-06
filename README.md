@@ -1,5 +1,7 @@
 # prova
 
+[![verify](https://github.com/gabrielchv/prova/actions/workflows/verify.yml/badge.svg)](https://github.com/gabrielchv/prova/actions/workflows/verify.yml)
+
 **A portfolio where every claim cites a file that exists in the repository — and
 the build fails if it doesn't.**
 
