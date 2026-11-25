@@ -104,6 +104,52 @@ class CitationResolutionTests(unittest.TestCase):
             ["app/api/status/[slug]/events/route.ts"],
         )
 
+    def test_missing_bracketed_path_does_not_resolve_to_a_different_file(self):
+        # The exact-match rule above only protects a path that exists. When it
+        # does not, fnmatch read `[slug]` as a character class and matched
+        # `s` -- so a citation naming the [slug] route resolved to an unrelated
+        # route and the claim counted as backed by the wrong file.
+        paths = ["app/api/status/s/events/route.ts", "app/api/healthz/route.ts"]
+        self.assertEqual(
+            validate.resolve_citation("app/api/status/[slug]/events/route.ts", paths),
+            [],
+        )
+
+    def test_question_mark_is_literal_not_a_wildcard(self):
+        # `?` is a glob metacharacter and also an ordinary typo character. A
+        # citation is either a real path or it is wrong; it should not silently
+        # match a neighbouring file.
+        self.assertEqual(validate.resolve_citation("src/backoff?ts", self.PATHS), [])
+
+    def test_a_glob_must_name_a_real_path_component(self):
+        # `*`, `**/*` and `*/*` say "somewhere in the tree", which is not a
+        # citation: there is no file a reader can open to see what backs the
+        # claim. `src/*.ts` is fine because "src" says where to look.
+        for cite in ("*", "**/*", "*/*", "[a-z]*", "*.ts"):
+            with self.subTest(cite=cite):
+                self.assertEqual(validate.resolve_citation(cite, self.PATHS), [])
+        self.assertEqual(
+            validate.resolve_citation("src/*.ts", self.PATHS),
+            ["src/backoff.ts", "src/signature.ts"],
+        )
+
+    def test_a_glob_wider_than_the_cap_is_refused(self):
+        paths = [f"src/f{index}.ts" for index in range(validate.MAX_CITATION_MATCHES + 1)]
+        paths.append("README.md")
+        self.assertEqual(validate.resolve_citation("src/*.ts", paths), [])
+
+    def test_a_glob_at_the_cap_still_resolves(self):
+        paths = [f"src/f{index}.ts" for index in range(validate.MAX_CITATION_MATCHES)]
+        paths.append("README.md")
+        self.assertEqual(
+            len(validate.resolve_citation("src/*.ts", paths)),
+            validate.MAX_CITATION_MATCHES,
+        )
+
+    def test_a_directory_prefix_wider_than_the_cap_is_refused(self):
+        paths = [f"src/f{index}.ts" for index in range(validate.MAX_CITATION_MATCHES + 1)]
+        self.assertEqual(validate.resolve_citation("src/", paths), [])
+
 
 class RuleTests(unittest.TestCase):
     def run_case(self, case):

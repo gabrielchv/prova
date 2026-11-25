@@ -56,23 +56,79 @@ OVERCLAIM = (
 
 PROSE_PATHS = ("tagline", "problem")
 
+MAX_CITATION_MATCHES = 25
+"""How many files one citation may resolve to.
+
+A citation is a pointer a reader can follow. A directory or a scoped glob points
+somewhere; `*` points at the whole tree, which is not a pointer. Without a cap
+the degenerate patterns (`*`, `**/*`, `[a-z]*`) resolved to every path in the
+repository and the claim counted as fully backed.
+"""
+
+# Only `*` marks a deliberate glob. `[` and `?` are also glob metacharacters,
+# but real paths in these repositories contain them literally (Next.js route
+# segments such as `app/api/status/[slug]/events/route.ts`), and `?` is the
+# kind of character that appears in a typo. Treating those as patterns let a
+# citation that does not exist resolve to a *different* file:
+# `app/api/status/[slug]/events/route.ts` matched `app/api/status/s/events/route.ts`
+# via character-class semantics, so a claim about a route was "verified" against
+# an unrelated route.
+_GLOB_MARKER = "*"
+
+
+def _unbounded_matches(cite: str, paths: list[str]) -> int:
+    """How many files a citation would match if breadth were not capped."""
+    if cite in paths:
+        return 0
+    if cite.endswith("/"):
+        return sum(1 for path in paths if path.startswith(cite))
+    if _GLOB_MARKER in cite:
+        return len(fnmatch.filter(paths, cite))
+    return 0
+
 
 def resolve_citation(cite: str, paths: list[str]) -> list[str]:
     """Resolve a citation to real file paths.
 
-    Supported forms: an exact path, a directory prefix ending in '/', or a glob.
-    An exact match always wins, because real paths in this codebase contain
-    characters that glob syntax also uses: Next.js route segments such as
-    `app/api/status/[slug]/events/route.ts` would otherwise be interpreted as a
-    character class and silently fail to resolve.
+    Supported forms: an exact path, a directory prefix ending in '/', or a glob
+    marked with `*`.
+
+    An exact match always wins, and a citation containing glob punctuation but
+    no `*` is treated as an exact path rather than a pattern — see
+    `_GLOB_MARKER`.
+
+    Two breadth rules, because a citation has to point at something:
+
+    - a *glob* that matches the entire tree (`*`, `**/*`) resolves to nothing.
+      It names every file, which is the same as naming none;
+    - anything matching more than `MAX_CITATION_MATCHES` files resolves to
+      nothing, which keeps an incidentally huge pattern from counting as
+      traceable. A directory prefix with one file in it is unaffected.
     """
     if cite in paths:
         return [cite]
     if cite.endswith("/"):
-        return sorted(path for path in paths if path.startswith(cite))
-    if any(token in cite for token in "*?["):
-        return sorted(fnmatch.filter(paths, cite))
-    return []
+        matches = sorted(path for path in paths if path.startswith(cite))
+    elif _GLOB_MARKER in cite:
+        if not _names_a_real_component(cite):
+            return []
+        matches = sorted(fnmatch.filter(paths, cite))
+    else:
+        return []
+    return matches if len(matches) <= MAX_CITATION_MATCHES else []
+
+
+def _names_a_real_component(cite: str) -> bool:
+    """Whether a glob names at least one literal path component.
+
+    `src/*.ts` says where to look; `*`, `**/*` and `*/*` say "somewhere". A
+    citation that does not name a directory or a filename points at nothing a
+    reader can open, whatever the tree looks like.
+    """
+    return any(
+        segment and not any(mark in segment for mark in _GLOB_MARKER + "?[")
+        for segment in cite.split("/")
+    )
 
 
 def prose_fragments(case: dict):
@@ -127,6 +183,17 @@ def check_citations(
         report.citations += 1
         matches = resolve_citation(cite, paths)
         if not matches:
+            # A pattern that matched too much is a different mistake from a path
+            # that does not exist, and deserves a different message: the author
+            # did not mistype a filename, they cited the repository.
+            broad = _unbounded_matches(cite, paths)
+            if broad:
+                report.error(
+                    label,
+                    f'{where} cites "{cite}", which matches {broad} files; a citation must '
+                    "point at what backs the claim, not at the whole tree",
+                )
+                continue
             report.error(
                 label,
                 f'{where} cites "{cite}", which is not in the repository at the recorded commit',
