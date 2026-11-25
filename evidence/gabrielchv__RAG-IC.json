@@ -1,11 +1,11 @@
 {
   "repo": "gabrielchv/RAG-IC",
-  "collected_at": "2026-11-06T17:10:25Z",
+  "collected_at": "2026-11-25T20:10:59Z",
   "default_branch": "main",
   "private": false,
-  "head_sha": "5a813ffc33e147fac4ba76b50e917d65563bab09",
-  "head_date": "2026-08-20T19:03:54Z",
-  "pushed_at": "2026-08-20T19:24:04Z",
+  "head_sha": "5f8acab08298ab41202d3c34c66dac4f9b9b9f3f",
+  "head_date": "2026-11-25T04:14:48Z",
+  "pushed_at": "2026-11-25T20:04:38Z",
   "homepage": null,
   "primary_language": "Python",
   "languages": {

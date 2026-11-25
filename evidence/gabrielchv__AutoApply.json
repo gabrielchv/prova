@@ -1,15 +1,15 @@
 {
   "repo": "gabrielchv/AutoApply",
-  "collected_at": "2026-11-06T17:10:21Z",
+  "collected_at": "2026-11-25T20:10:55Z",
   "default_branch": "main",
   "private": false,
-  "head_sha": "46bb940a478c8a5aaae1a0ae0754ec697025170c",
-  "head_date": "2026-08-24T18:15:14Z",
-  "pushed_at": "2026-08-24T18:15:17Z",
+  "head_sha": "48fa93d2dd53f25c153ab4fb8da4867ab86e3fc9",
+  "head_date": "2026-11-24T14:13:51Z",
+  "pushed_at": "2026-11-24T14:13:54Z",
   "homepage": null,
   "primary_language": "TypeScript",
   "languages": {
-    "TypeScript": 165846,
+    "TypeScript": 166131,
     "CSS": 8034,
     "JavaScript": 858,
     "HTML": 723

@@ -1,11 +1,11 @@
 {
   "repo": "gabrielchv/spring-rabbit-saga",
-  "collected_at": "2026-11-06T17:10:36Z",
+  "collected_at": "2026-11-25T20:11:09Z",
   "default_branch": "master",
   "private": false,
-  "head_sha": "76b92f9b3eecd9b75fad8199d9ecfa18c9fd1cfe",
-  "head_date": "2026-10-09T16:38:38Z",
-  "pushed_at": "2026-10-09T16:38:40Z",
+  "head_sha": "575380d7c7beebdac8b37f98b398599b920b480f",
+  "head_date": "2026-11-25T19:50:00Z",
+  "pushed_at": "2026-11-25T20:05:40Z",
   "homepage": null,
   "primary_language": "Java",
   "languages": {
@@ -14,7 +14,7 @@
     "Shell": 6671,
     "Dockerfile": 1041
   },
-  "file_count": 65,
+  "file_count": 68,
   "tree_truncated": false,
   "paths": [
     ".github/workflows/ci.yml",
@@ -37,6 +37,7 @@
     "inventory-service/src/main/java/dev/gazerah/saga/inventory/inventory/InventoryConsumer.java",
     "inventory-service/src/main/java/dev/gazerah/saga/inventory/inventory/InventoryService.java",
     "inventory-service/src/main/resources/application.yml",
+    "inventory-service/src/test/java/dev/gazerah/saga/inventory/config/RabbitConfigDeadLetterTest.java",
     "inventory-service/src/test/java/dev/gazerah/saga/inventory/inventory/InventoryServiceTest.java",
     "order-service/.dockerignore",
     "order-service/.mvn/wrapper/maven-wrapper.properties",
@@ -61,6 +62,7 @@
     "order-service/src/main/java/dev/gazerah/saga/order/order/OrderStatus.java",
     "order-service/src/main/java/dev/gazerah/saga/order/saga/OrderSagaConsumer.java",
     "order-service/src/main/resources/application.yml",
+    "order-service/src/test/java/dev/gazerah/saga/order/config/RabbitConfigDeadLetterTest.java",
     "order-service/src/test/java/dev/gazerah/saga/order/order/OrderControllerTest.java",
     "order-service/src/test/java/dev/gazerah/saga/order/order/OrderServiceTest.java",
     "payment-service/.dockerignore",
@@ -75,6 +77,7 @@
     "payment-service/src/main/kotlin/dev/gazerah/saga/payment/payment/PaymentConsumer.kt",
     "payment-service/src/main/kotlin/dev/gazerah/saga/payment/payment/PaymentService.kt",
     "payment-service/src/main/resources/application.yml",
+    "payment-service/src/test/kotlin/dev/gazerah/saga/payment/config/RabbitConfigDeadLetterTest.kt",
     "payment-service/src/test/kotlin/dev/gazerah/saga/payment/payment/PaymentServiceTest.kt",
     "postman/local.postman_environment.json",
     "postman/spring-rabbit-saga.postman_collection.json",
@@ -89,9 +92,12 @@
       ".github/workflows/deploy.yml"
     ],
     "tests": [
+      "inventory-service/src/test/java/dev/gazerah/saga/inventory/config/RabbitConfigDeadLetterTest.java",
       "inventory-service/src/test/java/dev/gazerah/saga/inventory/inventory/InventoryServiceTest.java",
+      "order-service/src/test/java/dev/gazerah/saga/order/config/RabbitConfigDeadLetterTest.java",
       "order-service/src/test/java/dev/gazerah/saga/order/order/OrderControllerTest.java",
       "order-service/src/test/java/dev/gazerah/saga/order/order/OrderServiceTest.java",
+      "payment-service/src/test/kotlin/dev/gazerah/saga/payment/config/RabbitConfigDeadLetterTest.kt",
       "payment-service/src/test/kotlin/dev/gazerah/saga/payment/payment/PaymentServiceTest.kt"
     ],
     "terraform": [],

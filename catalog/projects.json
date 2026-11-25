@@ -26,7 +26,7 @@
       ],
       "live_url": null,
       "claim_count": 8,
-      "verified_commit": "46bb940a478c8a5aaae1a0ae0754ec697025170c",
+      "verified_commit": "48fa93d2dd53f25c153ab4fb8da4867ab86e3fc9",
       "case_file": "cases/autoapply.yaml"
     },
     {
@@ -84,7 +84,7 @@
       ],
       "live_url": null,
       "claim_count": 7,
-      "verified_commit": "106216be32661e718bf5c10b9e4d2405a5a2c6f3",
+      "verified_commit": "0c9ae4b6e079a8087ee8bb77188a2e6ebff15047",
       "case_file": "cases/caderno.yaml"
     },
     {
@@ -112,7 +112,7 @@
       ],
       "live_url": null,
       "claim_count": 7,
-      "verified_commit": "030d15826dc4407576d0ef22578d4d91f473c3fb",
+      "verified_commit": "375667a4593b161fe77a18d9750cf492e6d8f308",
       "case_file": "cases/hookrelay.yaml"
     },
     {
@@ -140,7 +140,7 @@
       ],
       "live_url": null,
       "claim_count": 8,
-      "verified_commit": "483e9ca5a548c3a7637e627b760a3d53607ab561",
+      "verified_commit": "d4d40e7151f806ff6a48c4cc617220484e6a224f",
       "case_file": "cases/inquilino-ia.yaml"
     },
     {
@@ -196,7 +196,7 @@
       ],
       "live_url": null,
       "claim_count": 8,
-      "verified_commit": "b20828399ea4b46d8aec5acc7d3069ba74f93545",
+      "verified_commit": "85c290b8990c8580e39341de44c946c7dbb62cea",
       "case_file": "cases/obsidian-chatter.yaml"
     },
     {
@@ -222,7 +222,7 @@
       ],
       "live_url": null,
       "claim_count": 8,
-      "verified_commit": "5a813ffc33e147fac4ba76b50e917d65563bab09",
+      "verified_commit": "5f8acab08298ab41202d3c34c66dac4f9b9b9f3f",
       "case_file": "cases/rag-ic.yaml"
     },
     {
@@ -250,7 +250,7 @@
       ],
       "live_url": null,
       "claim_count": 8,
-      "verified_commit": "76b92f9b3eecd9b75fad8199d9ecfa18c9fd1cfe",
+      "verified_commit": "575380d7c7beebdac8b37f98b398599b920b480f",
       "case_file": "cases/spring-rabbit-saga.yaml"
     },
     {
@@ -306,7 +306,7 @@
       ],
       "live_url": "https://task-organizer.gazerah.com",
       "claim_count": 8,
-      "verified_commit": "22168562cc380558cb92410dbde84202d14550fc",
+      "verified_commit": "ff5dffc71e19a13b9a021ec4bf028d347bb5fd0f",
       "case_file": "cases/task-organizer.yaml"
     }
   ]

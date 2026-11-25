@@ -1,11 +1,11 @@
 {
   "repo": "gabrielchv/Obsidian-Chatter",
-  "collected_at": "2026-11-06T17:10:23Z",
+  "collected_at": "2026-11-25T20:10:57Z",
   "default_branch": "main",
   "private": false,
-  "head_sha": "b20828399ea4b46d8aec5acc7d3069ba74f93545",
-  "head_date": "2026-09-15T08:52:37Z",
-  "pushed_at": "2026-09-15T08:53:15Z",
+  "head_sha": "85c290b8990c8580e39341de44c946c7dbb62cea",
+  "head_date": "2026-11-25T04:12:07Z",
+  "pushed_at": "2026-11-25T20:04:30Z",
   "homepage": null,
   "primary_language": "Python",
   "languages": {
@@ -15,7 +15,7 @@
     "HTML": 686,
     "CSS": 80
   },
-  "file_count": 64,
+  "file_count": 65,
   "tree_truncated": false,
   "paths": [
     ".env.example",
@@ -75,6 +75,7 @@
     "tests/test_chunking.py",
     "tests/test_deepseek.py",
     "tests/test_index.py",
+    "tests/test_loop_context.py",
     "tests/test_repo.py",
     "tests/test_skills.py",
     "tests/test_sse.py",
@@ -93,6 +94,7 @@
       "tests/test_chunking.py",
       "tests/test_deepseek.py",
       "tests/test_index.py",
+      "tests/test_loop_context.py",
       "tests/test_repo.py",
       "tests/test_skills.py",
       "tests/test_sse.py",
