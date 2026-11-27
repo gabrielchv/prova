@@ -202,6 +202,52 @@ class RuleTests(unittest.TestCase):
     def test_unknown_pillar_is_an_error(self):
         self.assert_error(self.run_case(base_case(pillars=["synergy"])), "unknown pillar")
 
+    # ---------------------------------------------------- no silent data loss
+    def test_unknown_field_is_an_error(self):
+        # A misspelled optional field is silently unchecked otherwise: the case
+        # looks correct, the typo'd field is never read, and no rule ever fires.
+        case = base_case()
+        case["tagline_ptt"] = "uma chamada em portugues com tamanho suficiente"
+        self.assert_error(self.run_case(case), "unknown field")
+
+    def test_duplicate_key_is_reported_against_the_file(self, tmp_path=None):
+        # `yaml.safe_load` keeps the last duplicate and says nothing, so a second
+        # `claims:` block silently discards the first set of claims and the case
+        # is then certified with half its evidence missing.
+        import tempfile
+        from unittest.mock import patch
+
+        import model
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "demo.yaml"
+            path.write_text(
+                "id: demo\nid: demo\nname: demo\n",
+                encoding="utf-8",
+            )
+            with patch.object(model, "CASES_DIR", Path(directory)):
+                cases = model.load_cases()
+
+        self.assertEqual(len(cases), 1)
+        self.assertIn("_error", cases[0])
+        self.assertIn("duplicate key", cases[0]["_error"])
+
+    def test_a_parse_error_is_reported_without_aborting_the_run(self):
+        import tempfile
+        from unittest.mock import patch
+
+        import model
+
+        with tempfile.TemporaryDirectory() as directory:
+            (Path(directory) / "bad.yaml").write_text("id: [unclosed\n", encoding="utf-8")
+            (Path(directory) / "good.yaml").write_text("id: good\n", encoding="utf-8")
+            with patch.object(model, "CASES_DIR", Path(directory)):
+                cases = model.load_cases()
+
+        self.assertEqual(len(cases), 2, "a broken file must not hide the other cases")
+        errors = [c for c in cases if "_error" in c]
+        self.assertEqual(len(errors), 1)
+
     # ------------------------------------------------------------------- identity
     def test_id_must_match_filename(self):
         self.assert_error(self.run_case(base_case(id="other")), "filename")

@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from model import (  # noqa: E402
     CLAIM_MAX_CHARS,
+    KNOWN_FIELDS,
     PILLARS,
     REQUIRED_FIELDS,
     is_test_path,
@@ -211,6 +212,21 @@ def check_case(case: dict, report: Report, seen_ids: set[str], seen_stems: set[s
     if "_invalid" in case:
         report.error(label, f"{case['_file']} does not contain a mapping")
         return
+
+    if "_error" in case:
+        # A case the YAML loader refused — a duplicate key today. Reported
+        # against the file rather than crashing the run, so one broken case does
+        # not hide the state of the other ten.
+        report.error(label, f"{case['_file']} {case['_error']}")
+        return
+
+    unknown = sorted(set(case) - KNOWN_FIELDS)
+    if unknown:
+        report.error(
+            label,
+            f"unknown field(s): {', '.join(unknown)}; a misspelled field is silently "
+            "unchecked, so it is treated as an error",
+        )
 
     missing = [field for field in REQUIRED_FIELDS if field not in case]
     if missing:

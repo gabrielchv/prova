@@ -51,6 +51,45 @@ REQUIRED_FIELDS = (
 
 CLAIM_MAX_CHARS = 280
 
+# Everything a case file may contain. A key outside this set is almost always a
+# typo (`limts`, `tagline_ptt`), and a silently ignored field is a rule that was
+# meant to be enforced and is not.
+KNOWN_FIELDS = frozenset(REQUIRED_FIELDS) | frozenset(
+    {
+        "tagline_pt",
+        "live_url",
+        # Added by the loader, not by the author.
+        "_file",
+        "_stem",
+        "_invalid",
+        "_error",
+    }
+)
+
+
+class _StrictLoader(yaml.SafeLoader):
+    """SafeLoader that refuses duplicate mapping keys.
+
+    `yaml.safe_load` resolves a repeated key by keeping the last one and saying
+    nothing. In a case file that means a `claims:` block pasted twice silently
+    discards the first set — the validator then certifies a case that is missing
+    half its claims, which is the exact failure this project exists to prevent.
+    """
+
+    def construct_mapping(self, node, deep=False):
+        seen = set()
+        for key_node, _value_node in node.value:
+            key = self.construct_object(key_node, deep=deep)
+            if key in seen:
+                raise yaml.constructor.ConstructorError(
+                    None,
+                    None,
+                    f"duplicate key {key!r}",
+                    key_node.start_mark,
+                )
+            seen.add(key)
+        return super().construct_mapping(node, deep=deep)
+
 
 def evidence_path(repo: str) -> Path:
     """Evidence files are named after owner and repo, since '/' cannot be in a name."""
@@ -61,12 +100,20 @@ def load_cases() -> list[dict]:
     """Load every case file, sorted, annotated with its filename.
 
     A file that does not parse to a mapping is returned wrapped so the validator
-    can report it rather than the loader dying with a traceback.
+    can report it rather than the loader dying with a traceback. The same applies
+    to a file that does not parse at all — a duplicate key is a defect in the
+    case, and it is reported as one, against the file, instead of aborting the
+    whole run.
     """
     cases: list[dict] = []
     for path in sorted(CASES_DIR.glob("*.yaml")):
-        with path.open(encoding="utf-8") as handle:
-            data = yaml.safe_load(handle)
+        try:
+            with path.open(encoding="utf-8") as handle:
+                data = yaml.load(handle, Loader=_StrictLoader)
+        except yaml.YAMLError as error:
+            mark = getattr(error, "problem_mark", None)
+            where = f" (line {mark.line + 1})" if mark else ""
+            data = {"_error": f"does not parse{where}: {error.__class__.__name__}: {error}"}
         if not isinstance(data, dict):
             data = {"_invalid": data}
         data["_file"] = path.name
