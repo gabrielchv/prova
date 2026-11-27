@@ -129,15 +129,51 @@ def load_evidence(repo: str) -> dict | None:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+TEST_DIRECTORIES = frozenset({"test", "tests", "__tests__", "spec", "specs", "testing", "e2e"})
+
+TEST_NAME_PREFIXES = ("test_", "test.")
+
+TEST_NAME_SUFFIXES = (
+    "_test.py",
+    "_test.go",
+    "_test.rs",
+    "_spec.rb",
+    "_test.rb",
+    ".test.js",
+    ".test.jsx",
+    ".test.ts",
+    ".test.tsx",
+    ".test.mjs",
+    ".spec.js",
+    ".spec.jsx",
+    ".spec.ts",
+    ".spec.tsx",
+    ".spec.mjs",
+    "Test.java",
+    "Tests.java",
+    "Test.kt",
+    "Tests.kt",
+)
+
+
 def is_test_path(path: str) -> bool:
-    """Whether a path looks like a test or spec, across the stacks in use here."""
+    """Whether a path looks like a test or spec, across the stacks in use here.
+
+    This decides two things: whether a claim cites an executable check at all, and
+    what lands in the collected `tests` shape facts. A false negative therefore
+    produces a *warning* on a case that does cite its tests, which is the kind of
+    noise that teaches people to ignore warnings.
+
+    The previous rule only recognised `tests/` at the start of a path, `test/` and
+    `tests/` with a leading slash, and a handful of Java/Kotlin suffixes. It missed
+    Python entirely — including `tool/test_validate.py` in this repository — along
+    with `*_test.py`, `*_test.go` and a `spec/` directory at any depth.
+    """
     name = path.rsplit("/", 1)[-1]
-    return (
-        path.startswith(("test/", "tests/", "spec/"))
-        or "/test/" in path
-        or "/tests/" in path
-        or "/__tests__/" in path
-        or ".test." in name
-        or ".spec." in name
-        or name.endswith(("Test.java", "Tests.java", "Test.kt", "Tests.kt"))
-    )
+    components = set(path.split("/")[:-1])
+
+    if components & TEST_DIRECTORIES:
+        return True
+    if name.startswith(TEST_NAME_PREFIXES):
+        return True
+    return name.endswith(TEST_NAME_SUFFIXES)
