@@ -1,6 +1,6 @@
 {
   "repo": "gabrielchv/bookcerto",
-  "collected_at": "2026-11-25T20:11:00Z",
+  "collected_at": "2026-11-27T16:07:30Z",
   "default_branch": "master",
   "private": false,
   "head_sha": "76ec49216d172660d402ac290458383816a47722",
@@ -106,6 +106,7 @@
       ".github/workflows/deploy.yml"
     ],
     "tests": [
+      "docs/superpowers/specs/2026-08-24-bookcerto-design.md",
       "e2e/booking.spec.ts",
       "src/lib/availability.test.ts",
       "src/lib/booking.test.ts",

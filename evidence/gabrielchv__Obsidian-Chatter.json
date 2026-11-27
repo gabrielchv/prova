@@ -1,6 +1,6 @@
 {
   "repo": "gabrielchv/Obsidian-Chatter",
-  "collected_at": "2026-11-25T20:10:57Z",
+  "collected_at": "2026-11-27T16:07:27Z",
   "default_branch": "main",
   "private": false,
   "head_sha": "85c290b8990c8580e39341de44c946c7dbb62cea",
@@ -9,7 +9,7 @@
   "homepage": null,
   "primary_language": "Python",
   "languages": {
-    "Python": 87933,
+    "Python": 99974,
     "TypeScript": 33501,
     "Dockerfile": 700,
     "HTML": 686,

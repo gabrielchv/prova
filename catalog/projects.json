@@ -84,7 +84,7 @@
       ],
       "live_url": null,
       "claim_count": 7,
-      "verified_commit": "0c9ae4b6e079a8087ee8bb77188a2e6ebff15047",
+      "verified_commit": "91813b1196a428df836ec7a323dc8e10dfb77577",
       "case_file": "cases/caderno.yaml"
     },
     {
@@ -112,7 +112,7 @@
       ],
       "live_url": null,
       "claim_count": 7,
-      "verified_commit": "375667a4593b161fe77a18d9750cf492e6d8f308",
+      "verified_commit": "709eca12eb3d106505f19cbf781faa8dd9168c39",
       "case_file": "cases/hookrelay.yaml"
     },
     {
@@ -140,7 +140,7 @@
       ],
       "live_url": null,
       "claim_count": 8,
-      "verified_commit": "d4d40e7151f806ff6a48c4cc617220484e6a224f",
+      "verified_commit": "eb00488f31d750246f4056326b682bc07338274e",
       "case_file": "cases/inquilino-ia.yaml"
     },
     {
@@ -222,7 +222,7 @@
       ],
       "live_url": null,
       "claim_count": 8,
-      "verified_commit": "5f8acab08298ab41202d3c34c66dac4f9b9b9f3f",
+      "verified_commit": "917f0c1671a8ca920f5fb210e58b3fde991bbafc",
       "case_file": "cases/rag-ic.yaml"
     },
     {
@@ -306,7 +306,7 @@
       ],
       "live_url": "https://task-organizer.gazerah.com",
       "claim_count": 8,
-      "verified_commit": "ff5dffc71e19a13b9a021ec4bf028d347bb5fd0f",
+      "verified_commit": "f995ad8b0bde9d7df4f65785083574d550e7c0c0",
       "case_file": "cases/task-organizer.yaml"
     }
   ]
