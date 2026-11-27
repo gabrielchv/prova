@@ -123,6 +123,20 @@ def collect_repo(repo: str, token: str | None) -> dict:
     }
 
 
+def write_atomically(path: Path, payload: str) -> None:
+    """Write via a sibling temp file and rename.
+
+    `write_text` truncates first, so an interrupted write leaves a truncated JSON
+    file that the next `make verify` reports as a parse error against the whole
+    run. A rename is atomic on POSIX: the file on disk is always either the
+    previous evidence or the new evidence.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(payload, encoding="utf-8")
+    temporary.replace(path)
+
+
 def main() -> int:
     token = resolve_token()
     if not token:
@@ -146,18 +160,36 @@ def main() -> int:
 
     EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
 
+    # Collect everything before writing anything.
+    #
+    # The loop used to write each evidence file as it went, so a refresh that
+    # failed on repository 8 of 11 left 7 files at the new head and 4 at the old
+    # one. The command exited 1, which stops CI — but a developer running
+    # `make refresh` by hand, or a CI step whose failure is retried, is left with
+    # a *mixed corpus* that `make verify` happily accepts, because each file is
+    # internally consistent. Half the catalogue would then pin commits nobody
+    # re-checked.
+    collected: dict[str, dict] = {}
     failures = 0
     for repo, label in sorted(repos.items()):
         try:
-            record = collect_repo(repo, token)
+            collected[repo] = collect_repo(repo, token)
         except RuntimeError as exc:
             print(f"  FAIL {label:<20} {exc}", file=sys.stderr)
             failures += 1
-            continue
-        destination = evidence_path(repo)
-        destination.write_text(
-            json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+
+    if failures:
+        print(
+            f"\n{failures} repository/repositories could not be collected; "
+            "no evidence files were written, so the committed corpus is unchanged.",
+            file=sys.stderr,
         )
+        return 1
+
+    for repo, record in sorted(collected.items()):
+        label = repos[repo]
+        destination = evidence_path(repo)
+        write_atomically(destination, json.dumps(record, indent=2, ensure_ascii=False) + "\n")
         print(
             f"  {label:<20} {record['head_sha'][:8] if record['head_sha'] else 'unknown':<10} "
             f"{record['file_count']:>4} paths  "
@@ -165,10 +197,7 @@ def main() -> int:
             f"{len(record['shape']['ci_workflows'])} CI"
         )
 
-    if failures:
-        print(f"\n{failures} repository/repositories could not be collected.", file=sys.stderr)
-        return 1
-    print(f"\nwrote {len(repos)} evidence file(s) to {EVIDENCE_DIR}")
+    print(f"\nwrote {len(collected)} evidence file(s) to {EVIDENCE_DIR}")
     return 0
 
 

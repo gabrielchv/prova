@@ -1,0 +1,26 @@
+{
+  "repo": "example/alpha",
+  "collected_at": "2026-01-01T00:00:00Z",
+  "default_branch": "main",
+  "private": false,
+  "head_sha": "0000000000000000000000000000000000000000",
+  "head_date": "2026-01-01T00:00:00Z",
+  "pushed_at": "2026-01-01T00:00:00Z",
+  "homepage": null,
+  "primary_language": "Python",
+  "languages": {
+    "Python": 1
+  },
+  "file_count": 1,
+  "tree_truncated": false,
+  "paths": [
+    "README.md"
+  ],
+  "shape": {
+    "ci_workflows": [],
+    "tests": [],
+    "terraform": [],
+    "containers": [],
+    "docs": []
+  }
+}
